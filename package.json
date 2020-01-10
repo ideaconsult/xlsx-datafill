@@ -1,0 +1,55 @@
+{
+  "name": "xlsx-datafill",
+  "version": "1.0.0",
+  "description": "Scalable, template based data population for Excel XLSX spreadsheets.",
+  "keywords": [
+    "excel",
+    "workbook",
+    "xlsx",
+    "populate",
+    "template",
+    "generate",
+    "browser",
+    "style"
+  ],
+  "main": "./src/XlsxDataFill.js",
+  "browser": {
+    "XlsxDataFill": "./browser/xlsx-datafill.js"
+  },
+  "config": {
+    "testsPath": "./test/*.spec.js",
+    "docAPI": "./API.md"
+  },
+  "scripts": {
+    "test": "gulp unit",
+    "browserify": "gulp browserify",
+    "docs": "gulp docs"
+  },
+  "author": "Ivan (Jonan) Georgiev <ivan@jonan.info>",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.15"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thejonan/xlsx-datafill.git"
+  },
+  "bugs": "https://github.com/thejonan/xlsx-datafill/issues",
+  "devDependencies": {
+    "xlsx-populate": "^1.20.0",
+    "@babel/core": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
+    "babelify": "^10.0.0",
+    "browserify": "^16.5.0",
+    "glob": "^7.1.6",
+    "gulp": "^4.0.2",
+    "gulp-eslint": "^6.0.0",
+    "gulp-jasmine": "^4.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-uglify-es": "^2.0.0",
+    "jsdoc-to-markdown": "^5.0.3",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
+  }
+}

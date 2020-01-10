@@ -1,0 +1,25 @@
+{
+  "name": "xlsx-smart-template",
+  "version": "1.0.0",
+  "homepage": "https://github.com/thejonan/xlsx-smart-template",
+  "author": "Ivan (Jonan) Georgiev <ivan@jonan.info>",
+  "description": "Scalable, template based data population for Excel XLSX spreadsheets.",
+  "main": "browser/xlsx-smart-template.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "src",
+    "node_modules",
+    "test"
+  ],
+  "keywords": [
+    "excel",
+    "workbook",
+    "xlsx",
+    "populate",
+    "template",
+    "generate",
+    "browser",
+    "style"
+  ]
+}
