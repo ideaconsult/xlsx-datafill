@@ -178,7 +178,7 @@ class XlsxDataFill {
             transposed = false,
             data = null;
 
-        if (!iter || iter == '1') {
+        if (iter == '1') {
             transposed = true;
             iter = iterators[++idx];
         }
