@@ -13,7 +13,7 @@ Data fill engine.
         * [.applyDataStyle(cell, data, template)](#XlsxDataFill+applyDataStyle) ⇒ <code>DataFiller</code>
         * [.parseTemplate(cell)](#XlsxDataFill+parseTemplate) ⇒ <code>Object</code>
         * [.collectTemplates(cb)](#XlsxDataFill+collectTemplates) ⇒ <code>undefined</code>
-        * [.extractValues(root, extractor)](#XlsxDataFill+extractValues) ⇒ <code>string</code> \| <code>Array</code> \| <code>Array.&lt;Array.&lt;\*&gt;&gt;</code>
+        * [.extractValues(root, extractor, cell)](#XlsxDataFill+extractValues) ⇒ <code>string</code> \| <code>Array</code> \| <code>Array.&lt;Array.&lt;\*&gt;&gt;</code>
         * [.extractData(root, iterators, idx)](#XlsxDataFill+extractData) ⇒ <code>Array</code> \| <code>Array.&lt;Array&gt;</code>
         * [.putValues(cell, data, template)](#XlsxDataFill+putValues) ⇒ <code>Array</code>
         * [.applyFill(aFill, root, mainCell)](#XlsxDataFill+applyFill) ⇒ <code>Array</code>
@@ -103,7 +103,7 @@ This is the order the callback is being invoked on.
 
 <a name="XlsxDataFill+extractValues"></a>
 
-### xlsxDataFill.extractValues(root, extractor) ⇒ <code>string</code> \| <code>Array</code> \| <code>Array.&lt;Array.&lt;\*&gt;&gt;</code>
+### xlsxDataFill.extractValues(root, extractor, cell) ⇒ <code>string</code> \| <code>Array</code> \| <code>Array.&lt;Array.&lt;\*&gt;&gt;</code>
 This method is used even when a whole - possibly rectangular - range is about to be set, so it can
 return an array of arrays.
 
@@ -114,6 +114,7 @@ return an array of arrays.
 | --- | --- | --- |
 | root | <code>Object</code> | The data root to be extracted values from. |
 | extractor | <code>string</code> | The extraction string provided by the template. Usually a JSON path within the data `root`. |
+| cell | <code>Cell</code> | A reference cell, if such exists. |
 
 <a name="XlsxDataFill+extractData"></a>
 

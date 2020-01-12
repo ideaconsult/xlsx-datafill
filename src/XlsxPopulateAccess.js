@@ -2,7 +2,44 @@
 
 const _ = require('lodash');
 
+const allStyles = [
+    "bold", 
+    "italic", 
+    "underline", 
+    "strikethrough", 
+    "subscript", 
+    "superscript", 
+    "fontSize", 
+    "fontFamily", 
+    "fontGenericFamily", 
+    "fontScheme", 
+    "fontColor", 
+    "horizontalAlignment", 
+    "justifyLastLine", 
+    "indent", 
+    "verticalAlignment", 
+    "wrapText", 
+    "shrinkToFit", 
+    "textDirection", 
+    "textRotation", 
+    "angleTextCounterclockwise", 
+    "angleTextClockwise", 
+    "rotateTextUp", 
+    "rotateTextDown", 
+    "verticalText", 
+    "fill", 
+    "border", 
+    "borderColor", 
+    "borderStyle", 
+    "leftBorder", "rightBorder", "topBorder", "bottomBorder", "diagonalBorder", 
+    "leftBorderColor", "rightBorderColor", "topBorderColor", "bottomBorderColor", "diagonalBorderColor", 
+    "leftBorderStyle", "rightBorderStyle", "topBorderStyle", "bottomBorderStyle", "diagonalBorderStyle", 
+    "diagonalBorderDirection", 
+    "numberFormat"
+];
+
 let _RichText = null;
+
 
 // const XlsxPopulate = require('xlsx-populate');
 
@@ -81,6 +118,25 @@ class XlsxPopulateAccess {
     }
 
     /**
+     * Creates a reference Id for a given cell, based on its sheet and address.
+     * @param {Cell} cell The cell to create a reference Id to.
+     * @returns {string} The id to be used as a reference for this cell.
+     */
+    cellRef(cell) {
+        return cell.address({ includeSheetName: true });
+    }
+
+    /**
+     * Build a reference string for a cell identified by @param adr, from the @param cell.
+     * @param {Cell} cell A cell that is a base of the reference.
+     * @param {string} adr The address of the target cell, as mentioned in @param cell.
+     * @returns {string} A reference string identifying the target cell uniquely.
+     */
+    buildRef(cell, adr) {
+        return adr ? cell.sheet().cell(adr).address({ includeSheetName: true }) : null;
+    }
+
+    /**
      * Retrieves a given cell from a given sheet (or an active one).
      * @param {string|object|array} address The cell adress to be used
      * @param {string|idx} sheetId The id/name of the sheet to retrieve the cell from. Defaults to an active one.
@@ -100,6 +156,17 @@ class XlsxPopulateAccess {
      */
     getCellRange(cell, rowOffset, colOffset) {
         return cell.rangeTo(cell.relativeCell(rowOffset, colOffset));
+    }
+
+    /**
+     * Gets the cell at a certain offset from a given one.
+     * @param {Cell} cell The reference cell to make the offset from.
+     * @param {int} rows Number of rows to offset.
+     * @param {int} cols Number of columns to offset.
+     * @returns {Cell} The resulting cell.
+     */
+    offsetCell(cell, rows, cols) {
+        return cell.relativeCell(rows, cols);
     }
 
     /**
@@ -131,10 +198,11 @@ class XlsxPopulateAccess {
      */
     copyStyle(dest, src) {
         if (src == dest) return this;
-        
+
         dest._styleId = src._styleId;
-        if (src._style)
-            dest._style = _.merge({}, src._style);
+        
+        // if (src._style)
+        //     dest._style = _.merge(new src._style.constructor(), src._style);
         
         return this;
     }

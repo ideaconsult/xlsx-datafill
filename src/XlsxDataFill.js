@@ -80,7 +80,7 @@ class XlsxDataFill {
                     if (typeof handler === 'function')
                         handler(data, cell, this._opts);
                 } else {
-                    const val = this.extractValues(data, pair.extractor);
+                    const val = this.extractValues(data, pair.extractor, cell);
                     if (val)
                         this._access.setStyle(cell, pair.name, val);
                 }
@@ -106,9 +106,9 @@ class XlsxDataFill {
         const parts = reMatch[1].split(this._opts.fieldSplitter).map(_.trim),
             iters = parts[1].split(/x|\*/).map(_.trim),
             styles = !parts[4] ? null : parts[4].split(",");
-    
+
         return {
-            reference: _.trim(parts[0]),
+            reference: this._access.buildRef(cell, _.trim(parts[0])),
             iterators: iters,
             extractor: parts[2] || "",
             cell: cell,
@@ -139,7 +139,7 @@ class XlsxDataFill {
         });
         
         return allTemplates
-            .sort((a, b) => a.reference == b.cell.address() ? 1 : b.reference == a.cell.address() ? -1 : 0)
+            .sort((a, b) => a.reference == this._access.cellRef(b.cell) ? 1 : b.reference == this._access.cellRef(a.cell) ? -1 : 0)
             .forEach(cb);
     }
 
@@ -147,21 +147,22 @@ class XlsxDataFill {
      * Extracts the value(s) from the provided data `root` to be set in the provided `cell`.
      * @param {{}} root The data root to be extracted values from.
      * @param {string} extractor The extraction string provided by the template. Usually a JSON path within the data `root`.
+     * @param {Cell} cell A reference cell, if such exists.
      * @returns {string|Array|Array.<Array.<*>>} The value to be used.
      * @description This method is used even when a whole - possibly rectangular - range is about to be set, so it can
      * return an array of arrays.
      */
-    extractValues(root, extractor) {
+    extractValues(root, extractor, cell) {
         const { path, handler } = this.parseExtractor(extractor);
 
         if (!Array.isArray(root))
             root = _.get(root, path, root);
         else if (root.sizes !== undefined)
-            root = !extractor ? root : _.map(root, entry => this.extractValues(entry, extractor));
+            root = !extractor ? root : _.map(root, entry => this.extractValues(entry, extractor, cell));
         else if (!handler)
             return root.join(this._opts.joinText || ",");
 
-        return !handler ? root : handler(root, null, this._opts);            
+        return !handler ? root : handler(root, cell, this._opts);
     }
 
     /**
@@ -214,7 +215,7 @@ class XlsxDataFill {
      */
     putValues(cell, data, template) {
         let entrySize = data.sizes,
-            value = this.extractValues(data, template.extractor);
+            value = this.extractValues(data, template.extractor, cell);
 
         // make sure, the 
         if (!entrySize || !entrySize.length) {
@@ -272,7 +273,7 @@ class XlsxDataFill {
 
                 for (let f = 0; f < aFill.dependents.length; ++f) {
                     const inFill = aFill.dependents[f],
-                        inCell = nextCell.relativeCell(inFill.offset[0], inFill.offset[1]),
+                        inCell = this._access.offsetCell(nextCell, inFill.offset[0], inFill.offset[1]),
                         innerSize = this.applyFill(inFill, inRoot, inCell);
 
                     _.forEach(innerSize, sizeMaxxer);
@@ -301,7 +302,7 @@ class XlsxDataFill {
                 }
 
                 // Finally, calculate the next cell.
-                nextCell = nextCell.relativeCell(rowOffset + template.padding[0], colOffset + template.padding[1] || 0);	
+                nextCell = this._access.offsetCell(nextCell, rowOffset + template.padding[0], colOffset + template.padding[1] || 0);	
             }
 
             // Now recalc combined entry size.
@@ -334,7 +335,7 @@ class XlsxDataFill {
                 aFill.offset = this._access.cellDistance(refFill.template.cell, template.cell);
             }
     
-            dataFills[template.cell.address()] = aFill;
+            dataFills[this._access.cellRef(template.cell)] = aFill;
         });
     
         // Apply each fill onto the sheet.
