@@ -2,46 +2,43 @@
 
 const _ = require('lodash');
 
-const allStyles = [
-    "bold", 
-    "italic", 
-    "underline", 
-    "strikethrough", 
-    "subscript", 
-    "superscript", 
-    "fontSize", 
-    "fontFamily", 
-    "fontGenericFamily", 
-    "fontScheme", 
-    "fontColor", 
-    "horizontalAlignment", 
-    "justifyLastLine", 
-    "indent", 
-    "verticalAlignment", 
-    "wrapText", 
-    "shrinkToFit", 
-    "textDirection", 
-    "textRotation", 
-    "angleTextCounterclockwise", 
-    "angleTextClockwise", 
-    "rotateTextUp", 
-    "rotateTextDown", 
-    "verticalText", 
-    "fill", 
-    "border", 
-    "borderColor", 
-    "borderStyle", 
-    "leftBorder", "rightBorder", "topBorder", "bottomBorder", "diagonalBorder", 
-    "leftBorderColor", "rightBorderColor", "topBorderColor", "bottomBorderColor", "diagonalBorderColor", 
-    "leftBorderStyle", "rightBorderStyle", "topBorderStyle", "bottomBorderStyle", "diagonalBorderStyle", 
-    "diagonalBorderDirection", 
-    "numberFormat"
-];
+// const allStyles = [
+//     "bold", 
+//     "italic", 
+//     "underline", 
+//     "strikethrough", 
+//     "subscript", 
+//     "superscript", 
+//     "fontSize", 
+//     "fontFamily", 
+//     "fontGenericFamily", 
+//     "fontScheme", 
+//     "fontColor", 
+//     "horizontalAlignment", 
+//     "justifyLastLine", 
+//     "indent", 
+//     "verticalAlignment", 
+//     "wrapText", 
+//     "shrinkToFit", 
+//     "textDirection", 
+//     "textRotation", 
+//     "angleTextCounterclockwise", 
+//     "angleTextClockwise", 
+//     "rotateTextUp", 
+//     "rotateTextDown", 
+//     "verticalText", 
+//     "fill", 
+//     "border", 
+//     "borderColor", 
+//     "borderStyle", 
+//     "leftBorder", "rightBorder", "topBorder", "bottomBorder", "diagonalBorder", 
+//     "leftBorderColor", "rightBorderColor", "topBorderColor", "bottomBorderColor", "diagonalBorderColor", 
+//     "leftBorderStyle", "rightBorderStyle", "topBorderStyle", "bottomBorderStyle", "diagonalBorderStyle", 
+//     "diagonalBorderDirection", 
+//     "numberFormat"
+// ];
 
 let _RichText = null;
-
-
-// const XlsxPopulate = require('xlsx-populate');
 
 /**
  * Data fill routines wrapper.
@@ -199,10 +196,10 @@ class XlsxPopulateAccess {
     copyStyle(dest, src) {
         if (src == dest) return this;
 
-        dest._styleId = src._styleId;
-        
-        // if (src._style)
-        //     dest._style = _.merge(new src._style.constructor(), src._style);
+        if (src._style !== undefined)
+            dest.style(src._style);
+        else if (src._styleId > 0)
+            dest._styleId = src._styleId;
         
         return this;
     }
