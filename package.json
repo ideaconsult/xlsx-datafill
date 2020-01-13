@@ -1,6 +1,6 @@
 {
   "name": "xlsx-datafill",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Scalable, template based data population for Excel XLSX spreadsheets.",
   "keywords": [
     "excel",
@@ -23,22 +23,22 @@
     "docTitle": "# xlsx-datafill API reference\n\r"
   },
   "scripts": {
-    "test": "gulp unit",
+    "test": "gulp test",
     "browserify": "gulp browserify",
     "docs": "gulp docs",
     "prepublishOnly": "npm test",
     "postpublish": "VERSION=$(node -e 'console.log(require(\"./package.json\").version)'); git push && git tag \"v${VERSION}\" && git push --tags"
   },
-  "author": "Ivan (Jonan) Georgiev <ivan@jonan.info>",
+  "author": "Ivan (Jonan) Georgiev <thejonan@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.15"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/thejonan/xlsx-datafill.git"
+    "url": "https://github.com/ideaconsult/xlsx-datafill.git"
   },
-  "bugs": "https://github.com/thejonan/xlsx-datafill/issues",
+  "bugs": "https://github.com/ideaconsult/xlsx-datafill/issues",
   "devDependencies": {
     "xlsx-populate": "^1.20.0",
     "@babel/core": "^7.7.7",
