@@ -1,6 +1,7 @@
 "use strict";
 
 const _ = require('lodash');
+
 const defaultOpts = {
     templateRegExp: new RegExp(/\{\{([^}]*)\}\}/),
     fieldSplitter: "|",
@@ -11,17 +12,20 @@ const defaultOpts = {
 };
 
 /**
- * Data fill engine.
+ * Data fill engine, taking an instance of Excel sheet accessor and a JSON object as data, and filling the values from the latter into the former.
  */
 class XlsxDataFill {
     /**
      * Constructs a new instance of XlsxDataFill with given options.
-     * @param {object} accessor An instance of XLSX data accessing class.
+     * @param {object} accessor An instance of XLSX spreadsheet accessing class.
      * @param {{}} opts Options to be used during processing.
-     * @param {RegExp} opts.templateRegExp The regular expression to be used for template parsing.
-     * @param {string} opts.fieldSplitter The string to be expected as template field splitter.
-     * @param {string} opts.joinText The string to be used when extracting array values.
-     * @param {object.<string, function>} opts.callbacksMap A map of handlers to be used for data extraction.
+     * @param {RegExp} opts.templateRegExp The regular expression to be used for template recognizing. 
+     * Default is `/\{\{([^}]*)\}\}/`, i.e. Mustache.
+     * @param {string} opts.fieldSplitter The string to be expected as template field splitter. Default is `|`.
+     * @param {string} opts.joinText The string to be used when the extracted value for a single cell is an array, 
+     * and it needs to be joined. Default is `,`.
+     * @param {object.<string, function>} opts.callbacksMap A map of handlers to be used for data and value extraction.
+     * There is one default - the empty one, for object key extraction.
      */
     constructor(accessor, opts) {
         this._opts = _.defaultsDeep({}, opts, defaultOpts);
@@ -32,16 +36,70 @@ class XlsxDataFill {
 
     /**
      * Setter/getter for XlsxDataFill's options as set during construction.
-     * @param {{}|null} newOpts If set - the news options to be used.
-     * @returns {XlsxDataFill|{}} The required options or XlsxDataFill (in set mode) for chaining.
+     * @param {{}|null} newOpts If set - the new options to be used. 
+     * @see {@constructor}.
+     * @returns {XlsxDataFill|{}} The required options (in getter mode) or XlsxDataFill (in setter mode) for chaining.
      */
     options(newOpts) {
         if (newOpts !== null) {
             _.merge(this._opts, newOpts);
-            this._access.options(this._opts);
             return this;
         } else
             return this._opts;
+    }
+
+    /**
+     * The main entry point for whole data population mechanism.
+     * @param {{}} data The data to be applied.
+     * @returns {XlsxDataFill} For invocation chaining.
+     */
+    fillData(data) {
+        const dataFills = {};
+	
+        // Build the dependency connections between templates.
+        this.collectTemplates(template => {
+            const aFill = {  
+                template: template, 
+                dependents: [],
+                processed: false
+            };
+    
+            if (template.reference) {
+                const refFill = dataFills[template.reference];
+                if (!refFill)
+                    throw new Error(`Unable to find a reference '${template.reference}'!`);
+                
+                refFill.dependents.push(aFill);
+                aFill.offset = this._access.cellDistance(refFill.template.cell, template.cell);
+            }
+    
+            dataFills[this._access.cellRef(template.cell)] = aFill;
+        });
+    
+        // Apply each fill onto the sheet.
+        _.each(dataFills, fill => {
+            if (!fill.processed)
+                this.applyFill(fill, data, fill.template.cell);
+        });
+
+        return this;
+    }
+
+    /**
+     * Retrieves the provided handler from the map.
+     * @param {string} handlerName The name of the handler.
+     * @returns {function} The handler function itself.
+     * @ignore
+     */
+    getHandler(handlerName) {
+        const handlerFn = this._opts.callbacksMap[handlerName];
+
+        if (!handlerFn)
+            throw new Error(`Handler '${handlerName}' cannot be found!`);
+        else if (typeof handlerFn !== 'function')
+            throw new Error(`Handler '${handlerName}' is not a function!`);
+        else 
+            return handlerFn;
     }
 
     /**
@@ -50,16 +108,18 @@ class XlsxDataFill {
      * @returns {object.<string, function>} A { `path`, `handler` } object representing the JSON path
      * ready for use and the provided `handler` _function_ - ready for invoking, if such is provided.
      * If not - the `path` property contains the provided `extractor`, and the `handler` is `null`.
+     * @ignore
      */
     parseExtractor(extractor) {
         // A specific extractor can be specified after semilon - find and remember it.
-        const extractParts = extractor.split(":");
+        const extractParts = extractor.split(":"),
+            handlerName = extractParts[1];
 
         return extractParts.length == 1
             ? { path: extractor, handler: null }
             : {
                 path: extractParts[0],
-                handler: this._opts.callbacksMap[extractParts[1]]
+                handler: this.getHandler(handlerName)
             };
     }
 
@@ -69,6 +129,7 @@ class XlsxDataFill {
      * @param {{}} data The data chunk for that cell.
      * @param {{}} template The template to be used for that cell.
      * @returns {DataFiller} For invocation chaining.
+     * @ignore
      */
     applyDataStyle(cell, data, template) {
         const styles = template.styles;
@@ -76,9 +137,7 @@ class XlsxDataFill {
         if (styles && data) {
             _.each(styles, pair => {
                 if (_.startsWith(pair.name, ":")) {
-                    const handler = this._opts.callbacksMap[pair.name.substr(1)];
-                    if (typeof handler === 'function')
-                        handler(data, cell, this._opts);
+                    this.getHandler(pair.name.substr(1))(data, cell, this._opts);
                 } else {
                     const val = this.extractValues(data, pair.extractor, cell);
                     if (val)
@@ -96,20 +155,23 @@ class XlsxDataFill {
      * @param {Cell} cell The cell containing the template to be parsed.
      * @returns {{}} The parsed template.
      * @description This method builds template info, taking into account the supplied options.
+     * @ignore
      */
     parseTemplate(cell) {
         // The options are in `this` argument.
-        const reMatch = (this._access.cellTextValue(cell) || '').match(this._opts.templateRegExp);
+        const reMatch = (this._access.cellValue(cell) || '').match(this._opts.templateRegExp);
         
         if (!reMatch) return null;
     
         const parts = reMatch[1].split(this._opts.fieldSplitter).map(_.trim),
-            iters = parts[1].split(/x|\*/).map(_.trim),
             styles = !parts[4] ? null : parts[4].split(",");
+        
+        if (parts.length < 2) 
+            throw new Error(`Not enough components of the template ${reMatch[0]}`);
 
         return {
-            reference: this._access.buildRef(cell, _.trim(parts[0])),
-            iterators: iters,
+            reference: this._access.buildRef(cell, parts[0]),
+            iterators: parts[1].split(/x|\*/).map(_.trim),
             extractor: parts[2] || "",
             cell: cell,
             cellSize: this._access.cellSize(cell),
@@ -128,6 +190,7 @@ class XlsxDataFill {
      * @description The templates collected are sorted, based on the intra-template reference - if one template
      * is referring another one, it'll appear _later_ in the returned array, than the referred template.
      * This is the order the callback is being invoked on.
+     * @ignore
      */
     collectTemplates(cb) {
         const allTemplates = [];
@@ -151,6 +214,7 @@ class XlsxDataFill {
      * @returns {string|Array|Array.<Array.<*>>} The value to be used.
      * @description This method is used even when a whole - possibly rectangular - range is about to be set, so it can
      * return an array of arrays.
+     * @ignore
      */
     extractValues(root, extractor, cell) {
         const { path, handler } = this.parseExtractor(extractor);
@@ -172,6 +236,7 @@ class XlsxDataFill {
      * @param {Array} iterators List of iterators - string JSON paths inside the root object.
      * @param {Number} idx The index in the iterators array to work on.
      * @returns {Array|Array.<Array>} An array (possibly of arrays) with extracted data.
+     * @ignore
      */
     extractData(root, iterators, idx) {
         let iter = iterators[idx],
@@ -200,6 +265,12 @@ class XlsxDataFill {
         } else if (!Array.isArray(data) && typeof data === 'object')
             data = _.values(data);
 
+        // Some data sanity checks.
+        if (!data)
+            throw new Error(`The iterator '${iter}' extracted no data!`);
+        else if (typeof data !== 'object')
+            throw new Error(`The data extracted from iterator '${iter}' is neither an array, nor object!`);
+
         sizes.unshift(transposed ? -data.length : data.length);
         data.sizes = sizes;
         return data;
@@ -212,6 +283,7 @@ class XlsxDataFill {
      * @param {Array} data The actual data to be put. The values will be _extracted_ from here first.
      * @param {{}} template The template that is being implemented with that data fill.
      * @returns {Array} Matrix size that this data has occupied on the sheet [rows, cols].
+     * @ignore
      */
     putValues(cell, data, template) {
         let entrySize = data.sizes,
@@ -244,6 +316,7 @@ class XlsxDataFill {
             });
         } else {
             // TODO: Deal with more than 3 dimensions case.
+            throw new Error(`Values extracted with '${template.extractor} are more than 2 dimension!'`);
         }
 
         return entrySize;
@@ -251,10 +324,11 @@ class XlsxDataFill {
 
     /**
      * Apply the given filter onto the sheet - extracting the proper data, following dependent fills, etc.
-     * @param {{}} aFill The fill to be applied, as constructed in the @see populate methods.
+     * @param {{}} aFill The fill to be applied, as constructed in the {@link fillData} method.
      * @param {{}} root The data root to be used for data extraction.
      * @param {Cell} mainCell The starting cell for data placement procedure.
      * @returns {Array} The size of the data put in [row, col] format.
+     * @ignore
      */
     applyFill(aFill, root, mainCell) {
         const template = aFill.template,
@@ -310,41 +384,6 @@ class XlsxDataFill {
         }
 
         return entrySize;
-    }
-
-    /**
-     * The main entry point for whole data population mechanism.
-     * @param {{}} data The data to be applied.
-     * @returns {XlsxDataFill} For invocation chaining.
-     */
-    fillData(data) {
-        const dataFills = {};
-	
-        // Build the dependency connections between templates.
-        this.collectTemplates(template => {
-            const aFill = {  
-                template: template, 
-                dependents: [],
-                processed: false
-            };
-    
-            if (template.reference) {
-                const refFill = dataFills[template.reference];
-                
-                refFill.dependents.push(aFill);
-                aFill.offset = this._access.cellDistance(refFill.template.cell, template.cell);
-            }
-    
-            dataFills[this._access.cellRef(template.cell)] = aFill;
-        });
-    
-        // Apply each fill onto the sheet.
-        _.each(dataFills, fill => {
-            if (!fill.processed)
-                this.applyFill(fill, data, fill.template.cell);
-        });
-
-        return this;
     }
 }
 

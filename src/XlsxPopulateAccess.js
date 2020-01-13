@@ -41,8 +41,8 @@ const _ = require('lodash');
 let _RichText = null;
 
 /**
- * Data fill routines wrapper.
- * @ignore
+ * `xslx-populate` library based accessor to a given Excel workbook. All these methods are internally used by {@link XlsxDataFill}, 
+ * but can be used as a reference for implementing custom spreadsheet accessors.
  */
 class XlsxPopulateAccess {
     /**
@@ -50,8 +50,8 @@ class XlsxPopulateAccess {
      * @param {Workbook} workbook - The workbook to be accessed.
      * @param {XlsxPopulate} XlsxPopulate - The actual xlsx-populate library object.
      * @description The `XlsxPopulate` object need to be passed in order to extract
-     * certain information from it, _without_ referring the whole library, and thus
-     * making the `xlsx-datafill` package dependent on it.
+     * certain information from it, _without_ referring the whole library, thus
+     * avoiding making the `xlsx-datafill` package a dependency.
      */
     constructor(workbook, XlsxPopulate) {
         this._workbook = workbook;
@@ -74,9 +74,9 @@ class XlsxPopulateAccess {
      * @param {Cell} cell - The cell to retrieve the value from.
      * @returns {string} The textual representation of cell's contents.
      */
-    cellTextValue(cell) {
-        const cellValue = cell.value();
-        return cellValue instanceof _RichText ? cellValue.text() : cellValue;
+    cellValue(cell) {
+        const theValue = cell.value();
+        return theValue instanceof _RichText ? theValue.text() : theValue;
     }
 
     /**
@@ -168,7 +168,7 @@ class XlsxPopulateAccess {
 
     /**
      * Merge or split range of cells.
-     * @param {Range} range The range, as returned from @see getCellRange().
+     * @param {Range} range The range, as returned from {@link getCellRange}
      * @param {boolean} status The merged status to be set.
      * @returns {XlsxPopulateAccess} For chain invokes.
      */

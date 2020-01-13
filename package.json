@@ -1,6 +1,6 @@
 {
   "name": "xlsx-datafill",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "Scalable, template based data population for Excel XLSX spreadsheets.",
   "keywords": [
     "excel",
@@ -18,7 +18,8 @@
   },
   "config": {
     "testsPath": "./test/*.spec.js",
-    "docAPI": "./API.md"
+    "docAPI": "./API.md",
+    "docTitle": "# xlsx-datafill API reference\n\r"
   },
   "scripts": {
     "test": "gulp unit",

@@ -46,6 +46,9 @@ const CONFIG = {
         docAPIPath: pkg.config.docAPI
         
         // karma: ["./test/helpers/**/*.js", "./test/unit/**/*.spec.js"], // Helpers need to go first
+    },
+    NAMES: {
+        docAPITitle: pkg.config.docTitle
     }
 };
 
@@ -131,7 +134,7 @@ gulp.task("unit", async () => gulp
 gulp.task("docs", () => 
     jsdoc2md.render({ files: CONFIG.PATHS.src })
         .then(output => {
-            return fs.writeFileAsync(CONFIG.PATHS.docAPIPath, output);
+            return fs.writeFileAsync(CONFIG.PATHS.docAPIPath, CONFIG.NAMES.docAPITitle + output);
         })
 );
 

@@ -12,9 +12,9 @@ describe("XlsxPopulateAccess", () => {
     });
 
     it("reads workbook's cells", () => {
-        expect(xlsxAccess.cellTextValue(xlsxAccess.getCell("A1"))).toBe("{{ | | library }}");
-        expect(xlsxAccess.cellTextValue(xlsxAccess.getCell("A2"))).toBe("Book Title");
-        expect(xlsxAccess.cellTextValue(xlsxAccess.getCell("B3"))).toBe("{{ A3 | | author }}");
+        expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe("{{ | | library }}");
+        expect(xlsxAccess.cellValue(xlsxAccess.getCell("A2"))).toBe("Book Title");
+        expect(xlsxAccess.cellValue(xlsxAccess.getCell("B3"))).toBe("{{ A3 | | author }}");
     });
 
     it("calculates distance between cells.", () => {
@@ -43,6 +43,6 @@ describe("XlsxPopulateAccess", () => {
         const cell = xlsxAccess.getCell("A4"),
             theValue = "This is a test value!";
         xlsxAccess.setValue(cell, theValue);
-        expect(xlsxAccess.cellTextValue(cell)).toBe(theValue);
+        expect(xlsxAccess.cellValue(cell)).toBe(theValue);
     });
 });
