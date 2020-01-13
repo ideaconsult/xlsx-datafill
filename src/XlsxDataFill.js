@@ -149,7 +149,6 @@ class XlsxDataFill {
         return this;
     }
 
-
     /**
      * Parses the contents of the cell into a valid template info.
      * @param {Cell} cell The cell containing the template to be parsed.
@@ -278,7 +277,6 @@ class XlsxDataFill {
 
     /**
      * Put the data values into the proper cells, with correct extracted values.
-     * 
      * @param {{}} cell The starting cell for the data to be put.
      * @param {Array} data The actual data to be put. The values will be _extracted_ from here first.
      * @param {{}} template The template that is being implemented with that data fill.

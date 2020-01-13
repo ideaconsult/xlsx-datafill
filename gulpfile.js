@@ -43,6 +43,7 @@ const CONFIG = {
     PATHS: {
         src: `${path.dirname(pkg.main)}/**/*.js`,
         testsPath: pkg.config.testsPath,
+        examplesPaths: pkg.config.examplesPaths,
         docAPIPath: pkg.config.docAPI
         
         // karma: ["./test/helpers/**/*.js", "./test/unit/**/*.spec.js"], // Helpers need to go first
@@ -140,8 +141,8 @@ gulp.task("docs", () =>
 
 gulp.task("watch", () => {
     // Only watch src, unit, and docs for changes. Everything else is too slow or noisy.
-    gulp.watch([CONFIG.PATHS.src, CONFIG.PATHS.unitTests], ["unit"]);
-    gulp.watch([CONFIG.PATHS.src], ["build"]);
+    gulp.watch([CONFIG.PATHS.src], gulp.series(["test"]));
+    gulp.watch([CONFIG.PATHS.testsPath].concat(CONFIG.PATHS.examplesPaths), gulp.series(["unit"]));
 });
 
 gulp.task("build", gulp.parallel("docs", "browserify", "lint"));
@@ -149,4 +150,4 @@ gulp.task("build", gulp.parallel("docs", "browserify", "lint"));
 gulp.task("test", gulp.series("build", "unit"));
 
 // Watch just the quick stuff to aid development.
-gulp.task("default", gulp.series("unit", "watch"));
+gulp.task("default", gulp.series("test", "watch"));

@@ -84,7 +84,7 @@ The resulting table will look like:
 
 _One more thing..._ As the general syntax of the data extraction suggests - there is another, more elegant way to achieve the same result. The template in `B1` could have be written in the following form: `{{ | rows * data | }}`. Quite natural to write, and should be clear, by now, why it leads to the same result.
 
-There is one more heavy lifting task that the engine does - it automatically _merges cells_, if the referring template turns to occupy more than one cell in the same dimension. In other words, if the template in `B1` was written as `{{ A1 | data | }}`, (i.e. without the `1*` part), this would instruct the engine to grow the data vertically. But, the data from `A1` template, already grows vertically, so the engine will now to make the `A1` cells “bigger”, i.e. occupying more rows. The result will look like this:
+There is one more heavy lifting task that the engine does - it automatically _merges cells_, if the referring template turns to occupy more than one cell in the same dimension. In other words, if the template in `B1` was written as `{{ A1 | data | }}`, (i.e. without the `1*` part), this would instruct the engine to grow the data vertically. But, the data from `A1` template, already grows vertically, so the engine will have to make the `A1` cells “bigger”, i.e. occupying more rows. The result will look like this:
 
 |      | A     | B    |
 | ---- | ----- | ---- |
@@ -102,7 +102,7 @@ Hope it is clear by now. Check this and the [other examples](./examples/).
 
 ## How to use it
 
-The actual access to a XLSX notebook is delegated to an external library, through a so called _accessor_, and there is currently one implementation, based on [`xlsx-populate`](https://github.com/dtjohnson/xlsx-populate) library. Check the [API](./API.md) to see how a custom one can be implemented.
+The actual access to a XLSX notebook is delegated to an external library, through a so-called _accessor_, and there is currently one implementation, based on [`xlsx-populate`](https://github.com/dtjohnson/xlsx-populate) library. Check the [API](./API.md) to see how a custom one can be implemented.
 
 Considering the existing accessor implementation, the use of `xlsx-datafill` is quite simple:
 
@@ -125,7 +125,7 @@ wb.workbook().toFileAsync(...);
 
 ```
 
-**ATTENTION**: The template definitions are overwritten by the actual data, so don’t expect to be able to run `fillData()` with different data.
+> **Note**: The template definitions are overwritten by the actual data, so don’t expect to be able to run `fillData()` with different data.
 
 Check the [template options section](#template-options) for more information on how to configure the `XlsxDataFill` instance.
 
@@ -136,24 +136,26 @@ Refer to the [examples](./examples/) folder, as well as to the [API documentatio
 The general format of each template is like follows:
 
 ```
-{{ <reference cell> | 
-	<iterators> | 
-	<extractor> | 
-	<padding> | 
-	<styling> }}
+{{ <reference cell>
+ | <iterators>
+ | <extractor>
+ | <padding>
+ | <styling> }}
 ```
 
-Both the surrounding `{{`mustache`}}` brackets, and the `|` separator symbol are configurable, via [XlsxDataFill](./API.md#XlsxDataFill) constructor. 
+Both the surrounding `{{`mustache`}}` brackets, and the `|` separator symbol are configurable, via [XlsxDataFill](./API.md#XlsxDataFill) constructor’s options.
 
 The meaning of each field is:
 
 | Field       | Meaning                                                      |
 | ----------- | ------------------------------------------------------------ |
-| <reference> | The address of a cell, to be used as a reference for data extraction. If empty - the provided object’s root is considered. In both cases this is referred as _template data root_ in the rest of the description. |
-| <iterators> | JSON paths, determining how the data should be extracted from the _template data root_, and it follows the form <br />`<row data path> * <column data path>`. <br />The `<row path>` is applied on the _template data root_, while the `<col path` works on the result of `<row path>` extraction. If one needs the data to grow vertically (i.e. only as a column), the form `1 * <col path>` is allowed, in which case `<col path>` works directly on the _template data root_.<br />Can be empty, if the _template data root_ itself should be used. |
-| <extractor> | A JSON path, determining how the value that needs to be written in the cell(s) should be extracted from the data, provided by the iterators.<br />Can be omitted, in which case the iterators’ provided data is taken as a whole. |
-| <padding>   | A `:` delimited pair specifying how many cells on each direction `row:column` need to be _added_ for each new entry from the extracted data. Can be omitted. |
-| <styling>   | A comma-delimited styling pairs of the format `<style name>=<extractor>`, setting each cell’s style (with the given name), to the value extracted from iterator’s data, using the `extractor` as a JSON path. <br />E.g. `fill=danger:dangerColor` will set the `fill` style of each of the cells, to the value returned by `dangerColor` handler, when provided the value of `danger` property from each of the extracted entries. |
+| `reference` | The address of a cell, to be used as a reference for data extraction. If empty - the provided object’s root is considered. In both cases this is referred as _template data root_ in the rest of the description. |
+| `iterators` | JSON paths, determining how the data should be extracted from the _template data root_, and it follows the form <br />`<row data path> * <column data path>`. <br />The `<row path>` is applied on the _template data root_, while the `<col path` works on the result of `<row path>` extraction. If one needs the data to grow vertically (i.e. only as a column), the form `1 * <col path>` is allowed, in which case `<col path>` works directly on the _template data root_.<br />Can be empty, if the _template data root_ itself should be used. |
+| `extractor` | A JSON path, determining how the value that needs to be written in the cell(s) should be extracted from the data, provided by the iterators.<br />Can be omitted, in which case the iterators’ provided data is taken as a whole. |
+| `padding`   | A `:` delimited pair specifying how many cells on each direction `row:column` need to be _added_ for each new entry from the extracted data. Can be omitted. |
+| `styling`   | A comma-delimited styling pairs of the format `<style name>=<extractor>`, setting each cell’s style (with the given name), to the value extracted from iterator’s data, using the `extractor` as a JSON path. <br />E.g. `fill=danger:dangerColor` will set the `fill` style of each of the cells, to the value returned by `dangerColor` handler, when provided the value of `danger` property from each of the extracted entries. |
+
+The _JSON path_, mentioned above, refers to the ability to provide a full **path** of properties from the _template data root_ instead of just one property. So valid paths are, for example: `rows`, `genres.fiction`, `data[0].name`, etc. Check the [lodash’s `get` helper](https://lodash.com/docs/4.17.15#get), because this is what is used.
 
 In order to add additional flexibility, one can reference a user-provided function (via [template options](#template-options)) for both _iterators_ and _extractors_, including those used for styling. If a JSON-path component is suffixed with `:<handler name>` (e.g. `data:dataFix`, or even just `:dataGive`), the result of invoking the corresponding handler is used. The expected definition of such handler is:
 
@@ -170,9 +172,16 @@ function myHandler(data, cell, options);
 
 Few things need to be clarified. First, the context (i.e. `this`) provided is `null`.
 
-The `data` object is the one that corresponds to the given context. For example, in the following template `{{ A1 | rows:hRows * data:hData | :hNumber }}`. All three handlers `hRows`, `hData` and `hNumber` will be invoked with different `data` argument - `hRows` will receive whatever `rows` extracted, `hData` will receive, whatever `hRows` returned (!), and `hNumber` will be given whatever `hData` returned. 
+The `data` object is the one that corresponds to the given context. For example, in the following template:
 
-In other words, handlers are applied _after_, and their result taken _instead_ of, whatever data is extracted with the JSON path approach.
+```
+{{ A1 | rows:hRows * data:hData | :hNumber }}
+```
+All three handlers `hRows`, `hData` and `hNumber` will be invoked with different `data` argument - `hRows` will receive whatever `rows` extracted, `hData` will receive, whatever `hRows` returned (!), and `hNumber` will be given whatever `hData` returned. 
+
+In other words:
+
+> Handlers are applied **after**, and their result taken **instead of**, whatever data is extracted with the JSON path.
 
 Another interesting thing is styling. It is quite straightforward, however. Each named style, as recognized by [accessor’s `setStyle()` method](./API.md#XlsxPopulateAccess+setStyle), is referred and the value is extracted in the usual way (JSON path + handler).
 

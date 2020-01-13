@@ -18,13 +18,16 @@
   },
   "config": {
     "testsPath": "./test/*.spec.js",
+    "examplesPaths": [ "./examples/*-template.xsls", "./examples/*.json" ],
     "docAPI": "./API.md",
     "docTitle": "# xlsx-datafill API reference\n\r"
   },
   "scripts": {
     "test": "gulp unit",
     "browserify": "gulp browserify",
-    "docs": "gulp docs"
+    "docs": "gulp docs",
+    "prepublishOnly": "npm test",
+    "postpublish": "VERSION=$(node -e 'console.log(require(\"./package.json\").version)'); git push && git tag \"v${VERSION}\" && git push --tags"
   },
   "author": "Ivan (Jonan) Georgiev <ivan@jonan.info>",
   "license": "MIT",
