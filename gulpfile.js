@@ -1,10 +1,10 @@
 "use strict";
 
-/* eslint global-require: "off" */
-/* eslint-disable guard-for-in */
-
+const _ = require('lodash');
+const path = require('path');
 const gulp = require('gulp');
 const browserify = require('browserify');
+const browserifyShim = require('browserify-shim');
 const babelify = require('babelify');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
@@ -17,11 +17,7 @@ const jsdoc2md = require("jsdoc-to-markdown");
 const Promise = require("bluebird");
 const fs = Promise.promisifyAll(require("fs"));
 
-// const karma = require('karma');
-
 const pkg = require('./package.json');
-const _ = require('lodash');
-const path = require('path');
 
 const CONFIG = {
     BABEL: {
@@ -38,53 +34,18 @@ const CONFIG = {
         bundle: path.basename(_.values(pkg.browser)[0]),
         dirname: path.dirname(_.values(pkg.browser)[0]),
         sourceMap: "./",
-        exclude: ["lodash"]
+        shimConfig: { global: true }
     },
     PATHS: {
         src: `${path.dirname(pkg.main)}/**/*.js`,
-        testsPath: pkg.config.testsPath,
-        examplesPaths: pkg.config.examplesPaths,
-        docAPIPath: pkg.config.docAPI
-        
-        // karma: ["./test/helpers/**/*.js", "./test/unit/**/*.spec.js"], // Helpers need to go first
+        testsPath: "./test/*.spec.js",
+        examplesPaths: ["./examples/*-template.xsls", "./examples/*.json"],
+        docAPIPath: "./API.md"
     },
     NAMES: {
-        docAPITitle: pkg.config.docTitle
+        docAPITitle: "# xlsx-datafill API reference\n\r"
     }
 };
-
-// const runKarma = (files, cb) => {
-//     process.chdir(__dirname);
-//     new karma.Server({
-//         files,
-//         frameworks: ['browserify', 'jasmine'],
-//         browsers: ['Chrome', 'Firefox', 'IE'],
-//         preprocessors: {
-//             "./test/**/*.js": ['browserify']
-//         },
-//         plugins: [
-//             'karma-browserify',
-//             'karma-chrome-launcher',
-//             'karma-firefox-launcher',
-//             'karma-jasmine'
-//         ],
-//         browserify: {
-//             debug: true,
-//             transform: [["babelify", CONFIG.BABEL]],
-//             configure(bundle) {
-//                 bundle.once('prebundle', () => {
-//                     bundle.transform('babelify').plugin('proxyquire-universal');
-//                 });
-//             }
-//         },
-//         singleRun: true,
-//         autoWatch: false,
-//         captureTimeout: 210000,
-//         browserDisconnectTolerance: 3,
-//         browserDisconnectTimeout: 210000,
-//         browserNoActivityTimeout: 210000
-//     }, cb).start();
-// };
 
 gulp.task("browserify", () =>
     browserify({
@@ -92,7 +53,7 @@ gulp.task("browserify", () =>
         debug: true,
         standalone: CONFIG.BROWSERIFY.global
     })
-        .exclude(CONFIG.BROWSERIFY.exclude)
+        .transform(browserifyShim, CONFIG.BROWSERIFY.shimConfig)
         .transform(babelify, CONFIG.BABEL)
         .bundle()
         .pipe(source(CONFIG.BROWSERIFY.bundle))
@@ -115,22 +76,6 @@ gulp.task("unit", async () => gulp
     .src(CONFIG.PATHS.testsPath)
     .pipe(jasmine())
 );
-
-// gulp.task("e2e-generate", cb => {
-//     runJasmine(PATHS.jasmineConfigs.e2eGenerate, cb);
-// });
-
-// gulp.task("e2e-parse", cb => {
-//     runJasmine(PATHS.jasmineConfigs.e2eParse, cb);
-// });
-
-// gulp.task('e2e-browser', cb => {
-//     runKarma(["./test/helpers/**/*.js", "./browser/xlsx-populate.js", "./test/e2e-browser/**/*.spec.js"], cb);
-// });
-
-// gulp.task('unit-browser', cb => {
-//     runKarma(PATHS.karma, cb);
-// });
 
 gulp.task("docs", () => 
     jsdoc2md.render({ files: CONFIG.PATHS.src })
