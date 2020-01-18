@@ -163,14 +163,13 @@ In order to add additional flexibility, one can reference a user-provided functi
 /**
  * @param {object} data The data base for the current context. 
  * @param {Cell} cell A target cell, if applicable.
- * @param {object} options The user provided options.
  * @returns {*} The required value.
  */
-function myHandler(data, cell, options);
+function myHandler(data, cell);
 
 ```
 
-Few things need to be clarified. First, the context (i.e. `this`) provided is `null`.
+Few things need to be clarified. First, the context (i.e. `this`) provided is the _options_ object, as provided upon [XlsxDataFill instantiation](./API.md#new_XlsxDataFill_new).
 
 The `data` object is the one that corresponds to the given context. For example, in the following template:
 

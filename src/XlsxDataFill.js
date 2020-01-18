@@ -137,7 +137,7 @@ class XlsxDataFill {
         if (styles && data) {
             _.each(styles, pair => {
                 if (_.startsWith(pair.name, ":")) {
-                    this.getHandler(pair.name.substr(1))(data, cell, this._opts);
+                    this.getHandler(pair.name.substr(1)).call(this._opts, data, cell);
                 } else {
                     const val = this.extractValues(data, pair.extractor, cell);
                     if (val)
@@ -225,7 +225,7 @@ class XlsxDataFill {
         else if (!handler)
             return root.join(this._opts.joinText || ",");
 
-        return !handler ? root : handler(root, cell, this._opts);
+        return !handler ? root : handler.call(this._opts, root, cell);
     }
 
     /**
@@ -256,7 +256,7 @@ class XlsxDataFill {
         data = _.get(root, parsedIter.path, root);
         
         if (typeof parsedIter.handler === 'function')
-            data = parsedIter.handler.call(null, data, null, this._opts);
+            data = parsedIter.handler.call(this._opts, data);
 
         if (idx < iterators.length - 1) {
             data = _.map(data, inRoot => this.extractData(inRoot, iterators, idx + 1));

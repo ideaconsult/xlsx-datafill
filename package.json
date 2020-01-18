@@ -1,6 +1,6 @@
 {
   "name": "xlsx-datafill",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "Scalable, template based data population for Excel XLSX spreadsheets.",
   "keywords": [
     "excel",
