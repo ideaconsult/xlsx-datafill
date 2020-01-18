@@ -211,14 +211,8 @@ There are several specifics to be kept in mind:
 
 ## Contribution
 
-If anyone is interested there are several directions that this library can be extended:
+Any help is appreciated! Check [**the list in the repo**](https://github.com/ideaconsult/xlsx-datafill/labels/contribution). 
 
-* Another XLSX notebook accessors, based on different libraries. For example [xlsx-template](https://github.com/optilude/xlsx-template#readme).
-* Ability to make in-place data filling, i.e. preserving the data around the template definition.
-* Thank you!
+**Thank you!**
 
-## Changelog
-
-### Version 0.9
-
-The initial release.
+## [Changelog](https://github.com/ideaconsult/xlsx-datafill/releases)
