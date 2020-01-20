@@ -300,9 +300,11 @@ class XlsxDataFill {
             if (entrySize[0] < 0) {
                 entrySize = [1, -entrySize[0]];
                 value = [value];
+                data = [data];
             } else if (entrySize.length == 1) {
                 entrySize = entrySize.concat([1]);
                 value = _.chunk(value, 1);
+                data = _.chunk(data, 1);
             }
 
             this._access.getCellRange(cell, entrySize[0] - 1, entrySize[1] - 1).forEach((cell, ri, ci) => {
@@ -374,7 +376,7 @@ class XlsxDataFill {
                 }
 
                 // Finally, calculate the next cell.
-                nextCell = this._access.offsetCell(nextCell, rowOffset + template.padding[0], colOffset + template.padding[1] || 0);	
+                nextCell = this._access.offsetCell(nextCell, rowOffset + (template.padding[0] || 0), colOffset + (template.padding[1] || 0));	
             }
 
             // Now recalc combined entry size.
