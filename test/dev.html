@@ -1,0 +1,101 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>XlsxDataFill local testpage</title>
+  <meta name="description" content="XlsxDataFill demo">
+  <meta name="author" content="IDEAConsult Ltd.">
+</head>
+
+<body>
+  <h1>XlsxDataFill local testpage</h1>
+  <h2>Pick the template and data files</h2>
+  <input type="file" id="files" name="files[]" multiple="true" onchange="filesSelected(event)" style="font-size: large;"/>
+  <output id="list"></output>
+  <h2>Launch the data filling process</h2>
+  <button id="gobut" type="button" onclick="launch()" disabled="true" style="font-size: large;">Go!</button>
+
+  <script src="../node_modules/lodash/lodash.min.js"></script>
+  <script src="../node_modules/xlsx-populate/browser/xlsx-populate-no-encryption.min.js"></script>
+  <script src="../browser/xlsx-datafill.js"></script>
+
+  <script lang="javascript">
+    var wbData = null,
+        queryData = null,
+        parseConfig = {
+          templateRegExp: /\{\{([^}]*)\}\}/,
+          fieldSplitter: '|',
+          joinText: ',',
+          callbacksMap: {
+              upperify : function (val) { return val.toUpperCase(); }
+          }
+        };
+
+    function launch() {
+      XlsxPopulate.fromDataAsync(wbData).then(function (workbook) {
+        new XlsxDataFill(
+          new XlsxDataFill.XlsxPopulateAccess(workbook, XlsxPopulate),
+          parseConfig
+        ).fillData(queryData);
+
+        workbook.outputAsync().then(activateDownload, alert)
+      }, alert);
+    }
+
+    function filesSelected(evt) {
+      var files = evt.target.files; // FileList object
+
+      // files is a FileList of File objects. List some properties.
+      var output = [];
+      for (var i = 0, f; f = files[i]; i++) {
+        var reader = new FileReader(),
+            fInfo = 'Ok!';
+
+        if (f.type.match(/json/)) {
+          reader.onload = function (e) {
+            queryData = JSON.parse(e.target.result);
+            if (wbData)
+              document.getElementById('gobut').disabled = false;          
+          }
+          reader.readAsText(f);
+        }
+        else if (f.type.match(/officedocument|spreadsheetml|sheet/)) {
+          reader.onload = function (e) {
+            wbData = e.target.result;
+            if (queryData)
+              document.getElementById('gobut').disabled = false;          
+          }
+          reader.readAsArrayBuffer(f);
+        }
+        else
+          fInfo = "Unsupported type!";
+        
+        output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ', f.size, ' bytes','  - <strong>', fInfo, '</strong></li>');
+      }
+
+      document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+    }
+
+    function activateDownload(blob, error) {
+      var url = URL.createObjectURL(blob),
+          aEl = document.createElement('a');
+
+      aEl.href = url;
+      aEl.download = 'TestReport.xlsx';
+      aEl.addEventListener('click', function () {
+        setTimeout(function () {
+          if (aEl.parentElement)
+            aEl.parentElement.removeChild(aEl);
+          window.URL.revokeObjectURL(url);
+        }, 0);
+      });
+
+      aEl.click();
+    }
+  </script>
+</body>
+
+</html>

@@ -1,6 +1,6 @@
 {
   "name": "xlsx-datafill",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Scalable, template based data population for Excel XLSX spreadsheets.",
   "keywords": [
     "excel",
@@ -37,8 +37,8 @@
     "lodash": "^4.17.15"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.7",
-    "@babel/preset-env": "^7.7.7",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
     "babelify": "^10.0.0",
     "browserify": "^16.5.0",
     "browserify-shim": "^3.8.14",
@@ -52,6 +52,6 @@
     "jsdoc-to-markdown": "^5.0.3",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
-    "xlsx-populate": "^1.20.0"
+    "xlsx-populate": "^1.21.0"
   }
 }
