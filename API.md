@@ -39,7 +39,8 @@ Constructs a new instance of XlsxDataFill with given options.
 | opts.templateRegExp | <code>RegExp</code> | The regular expression to be used for template recognizing.  Default is `/\{\{([^}]*)\}\}/`, i.e. Mustache. |
 | opts.fieldSplitter | <code>string</code> | The string to be expected as template field splitter. Default is `|`. |
 | opts.joinText | <code>string</code> | The string to be used when the extracted value for a single cell is an array,  and it needs to be joined. Default is `,`. |
-| opts.mergeCells | <code>string</code> \| <code>boolean</code> | Whether to merge the higher dimension cells in the output. |
+| opts.mergeCells | <code>string</code> \| <code>boolean</code> | Whether to merge the higher dimension cells in the output. Default is true. |
+| opts.followFormulae | <code>boolean</code> | If a template is located as a result of a formula, whether to still process it. Default is false. |
 | opts.callbacksMap | <code>object.&lt;string, function()&gt;</code> | A map of handlers to be used for data and value extraction. There is one default - the empty one, for object key extraction. |
 
 <a name="XlsxDataFill+options"></a>
@@ -85,6 +86,8 @@ but can be used as a reference for implementing custom spreadsheet accessors.
     * [new XlsxPopulateAccess(workbook, XlsxPopulate)](#new_XlsxPopulateAccess_new)
     * [.workbook()](#XlsxPopulateAccess+workbook) ⇒ <code>Workbook</code>
     * [.cellValue(cell)](#XlsxPopulateAccess+cellValue) ⇒ <code>string</code>
+    * [.cellType(cell)](#XlsxPopulateAccess+cellType) ⇒ <code>string</code>
+    * [.cellFormula(cell)](#XlsxPopulateAccess+cellFormula) ⇒ <code>string</code>
     * [.cellDistance(from, to)](#XlsxPopulateAccess+cellDistance) ⇒ <code>Array.&lt;Number&gt;</code>
     * [.cellSize(cell)](#XlsxPopulateAccess+cellSize) ⇒ <code>Array.&lt;Number&gt;</code>
     * [.cellRef(cell)](#XlsxPopulateAccess+cellRef) ⇒ <code>string</code>
@@ -126,6 +129,31 @@ Gets the textual representation of the cell value.
 
 **Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
 **Returns**: <code>string</code> - The textual representation of cell's contents.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| cell | <code>Cell</code> | The cell to retrieve the value from. |
+
+<a name="XlsxPopulateAccess+cellType"></a>
+
+### xlsxPopulateAccess.cellType(cell) ⇒ <code>string</code>
+Gets the textual representation of the cell value.
+
+**Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
+**Returns**: <code>string</code> - The type of the cell - 'formula', 'richtext', 
+'text', 'number', 'date', 'hyperlink', or 'unknown';  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| cell | <code>Cell</code> | The cell to retrieve the value from. |
+
+<a name="XlsxPopulateAccess+cellFormula"></a>
+
+### xlsxPopulateAccess.cellFormula(cell) ⇒ <code>string</code>
+Gets the formula from the cell or null, if there isn't any
+
+**Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
+**Returns**: <code>string</code> - The formula inside the cell.  
 
 | Param | Type | Description |
 | --- | --- | --- |

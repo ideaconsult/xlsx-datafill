@@ -80,6 +80,40 @@ class XlsxPopulateAccess {
     }
 
     /**
+     * Gets the textual representation of the cell value.
+     * @param {Cell} cell - The cell to retrieve the value from.
+     * @returns {string} The type of the cell - 'formula', 'richtext', 
+     * 'text', 'number', 'date', 'hyperlink', or 'unknown';
+     */
+    cellType(cell) {
+        if (cell.formula())
+            return 'formula';
+        else if (cell.hyperlink())
+            return 'hyperlink';
+        
+        const theValue = cell.value();
+        if (theValue instanceof _RichText)
+            return 'richtext';
+        else if (theValue instanceof Date)
+            return 'date';
+        else if (theValue instanceof String)
+            return 'text';
+        else if (theValue instanceof Number)
+            return 'number';
+        else
+            return 'unknown';
+    }
+
+    /**
+     * Gets the formula from the cell or null, if there isn't any
+     * @param {Cell} cell - The cell to retrieve the value from.
+     * @returns {string} The formula inside the cell.
+     */
+    cellFormula(cell) {
+        return cell.formula();
+    }
+
+    /**
      * Measures the distance, as a vector between two given cells.
      * @param {Cell} from The first cell.
      * @param {Cell} to The second cell.
@@ -183,7 +217,11 @@ class XlsxPopulateAccess {
      * @returns {XlsxPopulateAccess} For chain invokes.
      */
     forAllCells(cb) {
-        this._workbook.sheets().forEach(sheet => sheet.usedRange().forEach(cb));
+        this._workbook.sheets().forEach(sheet => {
+            const theRange = sheet.usedRange();
+            if (theRange) 
+                theRange.forEach(cb);
+        });
         return this;
     }
 
