@@ -7,6 +7,7 @@ const defaultOpts = {
     fieldSplitter: "|",
     joinText: ",",
     mergeCells: true,
+    followFormulae: false,
     callbacksMap: {
         "": data => _.keys(data)
     }
@@ -25,7 +26,9 @@ class XlsxDataFill {
      * @param {string} opts.fieldSplitter The string to be expected as template field splitter. Default is `|`.
      * @param {string} opts.joinText The string to be used when the extracted value for a single cell is an array, 
      * and it needs to be joined. Default is `,`.
-     * @param {string|boolean} opts.mergeCells Whether to merge the higher dimension cells in the output.
+     * @param {string|boolean} opts.mergeCells Whether to merge the higher dimension cells in the output. Default is true.
+     * @param {boolean} opts.followFormulae If a template is located as a result of a formula, whether to still process it.
+     * Default is false.
      * @param {object.<string, function>} opts.callbacksMap A map of handlers to be used for data and value extraction.
      * There is one default - the empty one, for object key extraction.
      */
@@ -162,7 +165,7 @@ class XlsxDataFill {
         // The options are in `this` argument.
         const reMatch = (this._access.cellValue(cell) || '').match(this._opts.templateRegExp);
         
-        if (!reMatch) return null;
+        if (!reMatch || !this._opts.followFormulae && this._access.cellType(cell) === 'formula') return null;
     
         const parts = reMatch[1].split(this._opts.fieldSplitter).map(_.trim),
             styles = !parts[4] ? null : parts[4].split(",");

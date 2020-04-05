@@ -74,6 +74,39 @@ describe("XlsxDataFill: ", () => {
         });
     });
 
+    describe("Docs w/ Formula Template", () => {
+        let xlsxAccess;
+
+        beforeAll(async () => {
+            xlsxAccess = await processData("./examples/formula-template.xlsx", docsData);
+        });
+
+        afterAll(async () => {
+            await xlsxAccess.workbook().toFileAsync("./examples/formula-output.xlsx");
+        });
+
+        it("filled the title properly", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe(docsData.title);
+        });
+
+        it("filled headers properly", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A2", "NoRef"))).toBe("Row 1");
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A3", "NoRef"))).toBe("Row 2");
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A4", "NoRef"))).toBe("Row 3");
+        });
+
+        it("filled the data properly", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("B2", "NoRef"))).toBe(11);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("C3", "NoRef"))).toBe(22);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("D4", "NoRef"))).toBe(33);
+        });
+
+        it("didn't copy the formula", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A7", "NoRef"))).not.toBe(docsData.title);
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("A7", "NoRef"))).toBe("A1");
+        });
+    });
+
     describe("Simple Books Template", () => {
         let xlsxAccess;
 
