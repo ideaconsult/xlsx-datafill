@@ -6,6 +6,7 @@ const defaultOpts = {
     templateRegExp: new RegExp(/\{\{([^}]*)\}\}/),
     fieldSplitter: "|",
     joinText: ",",
+    mergeCells: true,
     callbacksMap: {
         "": data => _.keys(data)
     }
@@ -24,6 +25,7 @@ class XlsxDataFill {
      * @param {string} opts.fieldSplitter The string to be expected as template field splitter. Default is `|`.
      * @param {string} opts.joinText The string to be used when the extracted value for a single cell is an array, 
      * and it needs to be joined. Default is `,`.
+     * @param {string|boolean} opts.mergeCells Whether to merge the higher dimension cells in the output.
      * @param {object.<string, function>} opts.callbacksMap A map of handlers to be used for data and value extraction.
      * There is one default - the empty one, for object key extraction.
      */
@@ -371,7 +373,12 @@ class XlsxDataFill {
 
                 if (rowOffset > 1 || colOffset > 1) {
                     const rng = this._access.getCellRange(nextCell, Math.max(rowOffset - 1, 0), Math.max(colOffset - 1, 0));
-                    this._access.setRangeMerged(rng, true);
+
+                    if (this._opts.mergeCells === true || this._opts.mergeCell === 'both'
+                        || rowOffset > 1 && this._opts.mergeCells === 'vertical' 
+                        || colOffset > 1 && this._opts.mergeCells === 'horizontal')
+                        this._access.setRangeMerged(rng, true);
+
                     rng.forEach(cell => this._access.copySize(cell, template.cell));
                 }
 
