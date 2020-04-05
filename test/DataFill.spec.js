@@ -12,10 +12,10 @@ const docsData = require("../examples/docs-data.json");
 const bookData = require("../examples/book-data.json");
 const stockData = require("../examples/stock-data.json");
 
-const processData = async (path, data, handlers) => {
+const processData = async (path, data, handlers, opts) => {
     const wb = await XlsxPopulate.fromFileAsync(path);
     const xlsxAccess = new XlsxPopulateAccess(wb, XlsxPopulate);
-    const dataFill = new XlsxDataFill(xlsxAccess, { callbacksMap: handlers });
+    const dataFill = new XlsxDataFill(xlsxAccess, _.merge({ callbacksMap: handlers }, opts));
     dataFill.fillData(data);
     return xlsxAccess;
 };
@@ -133,6 +133,40 @@ describe("XlsxDataFill: ", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("E4"))).toBe(bookData.books[2].title);
         });
     });
+
+    describe("Publishers Books No-Merge Template", () => {
+        let xlsxAccess;
+
+        beforeAll(async () => {
+            xlsxAccess = await processData("./examples/publishers-template.xlsx", bookData, {
+                matchEdition: pub => _.uniqBy(_.filter(bookData.books, book => book.edition == pub), book => book.author),
+                matchAuthor: ref => _.filter(bookData.books, book => book.author == ref.author && book.edition == ref.edition)
+            }, {
+                mergeCells: false
+            });
+        });
+
+        afterAll(async () => {
+            await xlsxAccess.workbook().toFileAsync("./examples/publishers-output-unmerged.xlsx");
+        });
+
+        it("doesn't expand vertically", () => {
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A3"))).toEqual([1, 1]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A4"))).toEqual([1, 1]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A8"))).toEqual([1, 1]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A9"))).toEqual([1, 1]);
+        });
+
+        it("filled the non-reference iterative book titles", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A3"))).toBe(bookData.publishers[0]);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A8"))).toBe(bookData.publishers[1]);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("B3"))).toBe(bookData.books[0].author);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("B4"))).toBe(bookData.books[1].author);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("D4"))).toBe(bookData.books[1].title);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("E4"))).toBe(bookData.books[2].title);
+        });
+    });
+
 
     describe("Books Books Template", () => {
         let xlsxAccess;

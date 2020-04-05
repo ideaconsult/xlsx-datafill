@@ -39,6 +39,7 @@ Constructs a new instance of XlsxDataFill with given options.
 | opts.templateRegExp | <code>RegExp</code> | The regular expression to be used for template recognizing.  Default is `/\{\{([^}]*)\}\}/`, i.e. Mustache. |
 | opts.fieldSplitter | <code>string</code> | The string to be expected as template field splitter. Default is `|`. |
 | opts.joinText | <code>string</code> | The string to be used when the extracted value for a single cell is an array,  and it needs to be joined. Default is `,`. |
+| opts.mergeCells | <code>string</code> \| <code>boolean</code> | Whether to merge the higher dimension cells in the output. |
 | opts.callbacksMap | <code>object.&lt;string, function()&gt;</code> | A map of handlers to be used for data and value extraction. There is one default - the empty one, for object key extraction. |
 
 <a name="XlsxDataFill+options"></a>
