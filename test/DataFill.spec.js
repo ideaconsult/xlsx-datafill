@@ -16,7 +16,12 @@ const processData = async (path, data, handlers, opts) => {
     const wb = await XlsxPopulate.fromFileAsync(path);
     const xlsxAccess = new XlsxPopulateAccess(wb, XlsxPopulate);
     const dataFill = new XlsxDataFill(xlsxAccess, _.merge({ callbacksMap: handlers }, opts));
-    dataFill.fillData(data);
+    try {
+        dataFill.fillData(data);
+    } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+    }
     return xlsxAccess;
 };
 
@@ -101,9 +106,37 @@ describe("XlsxDataFill: ", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("D4", "NoRef"))).toBe(33);
         });
 
+        it("maintained the proper numeric style", () => {
+            expect(xlsxAccess.cellType(xlsxAccess.getCell("B2", "NoRef"))).toBe('number');
+            expect(xlsxAccess.cellType(xlsxAccess.getCell("C3", "NoRef"))).toBe('number');
+            expect(xlsxAccess.cellType(xlsxAccess.getCell("D4", "NoRef"))).toBe('number');
+        });
+
         it("didn't copy the formula", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("A7", "NoRef"))).not.toBe(docsData.title);
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("A7", "NoRef"))).toBe("A1");
+        });
+        
+        it("expanded the formula properly", () => {
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B8", "Ref"))).toBe('SUM(B2:F4)'); // 345
+        });
+
+        it("expanded and copied the formula properly", () => {
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B7", "Ref"))).toBe('SUM(B2:B4)'); // 63;
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C7", "Ref"))).toBe('SHARED'); // SUM(C2:C4) == 66;
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("F7", "Ref"))).toBe('SHARED'); // SUM(F2:F4) == 75;
+        });
+
+        it("expanded & copied the formula properly with external multiplication", () => {
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B9", "Ref"))).toBe('SUM(B2:B4) * $A$6'); // 126;
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C9", "Ref"))).toBe('SHARED'); // SUM(C2:C4) == 132;
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("F9", "Ref"))).toBe('SHARED'); // SUM(F2:F4) * $A$6 == 150;
+        });
+
+        it("it multiplied the formula properly", () => {
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B10", "Ref"))).toBe('B2 * $A$6'); // 22;
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C11", "Ref"))).toBe('SHARED'); // C3 * $A$6 == 44;
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("D12", "Ref"))).toBe('SHARED'); // D4 * $A$6 == 66;
         });
     });
 
@@ -119,7 +152,7 @@ describe("XlsxDataFill: ", () => {
         });
 
         it("filled the non-reference title properly", () => {
-            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe(bookData.library);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe(bookData.library.name);
         });
 
         it("kept the static titles", () => {

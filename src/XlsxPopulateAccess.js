@@ -70,13 +70,20 @@ class XlsxPopulateAccess {
     }
 
     /**
-     * Gets the textual representation of the cell value.
+     * Gets/Sets the textual representation of the cell value.
      * @param {Cell} cell - The cell to retrieve the value from.
+     * @param {*} value - The requested value for setting.
      * @returns {string} The textual representation of cell's contents.
+     * @returns {*|XlsxPopulateAccess} Either the requested value or chainable this.
      */
-    cellValue(cell) {
-        const theValue = cell.value();
-        return theValue instanceof _RichText ? theValue.text() : theValue;
+    cellValue(cell, value) {
+        if (value !== undefined) {
+            cell.value(value);
+            return this;
+        } else {
+            const theValue = cell.value();
+            return theValue instanceof _RichText ? theValue.text() : theValue;
+        }
     }
 
     /**
@@ -96,21 +103,22 @@ class XlsxPopulateAccess {
             return 'richtext';
         else if (theValue instanceof Date)
             return 'date';
-        else if (theValue instanceof String)
-            return 'text';
-        else if (theValue instanceof Number)
-            return 'number';
-        else
-            return 'unknown';
+        else 
+            return typeof theValue;
     }
 
     /**
      * Gets the formula from the cell or null, if there isn't any
      * @param {Cell} cell - The cell to retrieve the value from.
-     * @returns {string} The formula inside the cell.
+     * @param {string} formula - the text of the formula to be set.
+     * @returns {string} The formula inside the cell or this for chaining.
      */
-    cellFormula(cell) {
-        return cell.formula();
+    cellFormula(cell, formula) {
+        if (formula !== undefined) {
+            cell.formula(_.trimStart(formula, ' ='));
+            return this;
+        } else
+            return cell.formula();
     }
 
     /**
@@ -149,22 +157,44 @@ class XlsxPopulateAccess {
     }
 
     /**
+     * Sets a named style of a given cell.
+     * @param {Cell} cell The cell to be operated.
+     * @param {string} name The name of the style property to be set.
+     * @param {string|object} value The value for this property to be set.
+     * @returns {XlsxPopulateAccess} For invocation chaining.
+     */
+    cellStyle(cell, name, value) {
+        if (value !== undefined) {
+            cell.style(name, value);
+            return this;
+        } else {
+            return cell.style(name);
+        }
+    }
+
+    /**
      * Creates a reference Id for a given cell, based on its sheet and address.
      * @param {Cell} cell The cell to create a reference Id to.
+     * @param {boolean} withSheet Whether to include the sheet name in the reference. Defaults to true.
      * @returns {string} The id to be used as a reference for this cell.
      */
-    cellRef(cell) {
-        return cell.address({ includeSheetName: true });
+    cellRef(cell, withSheet) {
+        if (withSheet == null)
+            withSheet = true;
+        return cell.address({ includeSheetName: withSheet });
     }
 
     /**
      * Build a reference string for a cell identified by @param adr, from the @param cell.
      * @param {Cell} cell A cell that is a base of the reference.
      * @param {string} adr The address of the target cell, as mentioned in @param cell.
+     * @param {boolean} withSheet Whether to include the sheet name in the reference. Defaults to true.
      * @returns {string} A reference string identifying the target cell uniquely.
      */
-    buildRef(cell, adr) {
-        return adr ? cell.sheet().cell(adr).address({ includeSheetName: true }) : null;
+    buildRef(cell, adr, withSheet) {
+        if (withSheet == null)
+            withSheet = true;
+        return adr ? cell.sheet().cell(adr).address({ includeSheetName: withSheet }) : null;
     }
 
     /**
@@ -206,9 +236,40 @@ class XlsxPopulateAccess {
      * @param {boolean} status The merged status to be set.
      * @returns {XlsxPopulateAccess} For chain invokes.
      */
-    setRangeMerged(range, status) {
-        range.merged(status);
-        return this;
+    rangeMerged(range, status) {
+        if (status === undefined)
+            return range.merged();
+        else {
+            range.merged(status);
+            return this;
+        }
+    }
+
+    /**
+     * Sets a formula for the whole range. If it contains only one - it is set directly.
+     * @param {Range} range The range, as returned from {@link getCellRange}
+     * @param {String} formula The formula to be set.
+     * @returns {XlsxPopulateAccess} For chain invokes.
+     */
+    rangeFormula(range, formula) {
+        if (formula !== undefined) {
+            range.formula(_.trimStart(formula, ' ='));
+            return this;
+        } else {
+            return range.formula();
+        }
+    }
+
+    /**
+     * Return the string representation of a given range.
+     * @param {Range} range The range which address we're interested in.
+     * @param {boolean} withSheet Whether to include sheet name in the address.
+     * @return {String} The string, representing the given range.
+     */
+    rangeRef(range, withSheet) {
+        if (withSheet == null)
+            withSheet = true;
+        return range.address({ includeSheetName: withSheet });
     }
 
     /**
@@ -258,29 +319,6 @@ class XlsxPopulateAccess {
         if (this._colSizes[col] === undefined)
             dest.column().width(this._colSizes[col] = src.column().width());
 
-        return this;
-    }
-
-    /**
-     * Sets a value in the cell.
-     * @param {Cell} cell The cell to be operated.
-     * @param {string} value The string value to be set inside.
-     * @returns {XlsxPopulateAccess} For invocation chaining.
-     */
-    setValue(cell, value) {
-        cell.value(value);
-        return this;
-    }
-
-    /**
-     * Sets a named style of a given cell.
-     * @param {Cell} cell The cell to be operated.
-     * @param {string} name The name of the style property to be set.
-     * @param {string|object} value The value for this property to be set.
-     * @returns {XlsxPopulateAccess} For invocation chaining.
-     */
-    setStyle(cell, name, value) {
-        cell.style(name, value);
         return this;
     }
 }

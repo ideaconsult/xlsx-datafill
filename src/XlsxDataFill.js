@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 const defaultOpts = {
-    templateRegExp: new RegExp(/\{\{([^}]*)\}\}/),
+    templateRegExp: /\{\{([^}]*)\}\}/,
     fieldSplitter: "|",
     joinText: ",",
     mergeCells: true,
@@ -12,6 +12,8 @@ const defaultOpts = {
         "": data => _.keys(data)
     }
 };
+
+const refRegExp = /('?([^!]*)?'?!)?([A-Z]+\d+)(:([A-Z]+\d+))?/;
 
 /**
  * Data fill engine, taking an instance of Excel sheet accessor and a JSON object as data, and filling the values from the latter into the former.
@@ -66,24 +68,32 @@ class XlsxDataFill {
             const aFill = {  
                 template: template, 
                 dependents: [],
+                formulas: [],
                 processed: false
             };
-    
+
             if (template.reference) {
                 const refFill = dataFills[template.reference];
-                if (!refFill)
-                    throw new Error(`Unable to find a reference '${template.reference}'!`);
                 
-                refFill.dependents.push(aFill);
+                if (!refFill) throw new Error(`Unable to find a reference '${template.reference}'!`);
+                
+                if (template.formula) 
+                    refFill.formulas.push(aFill);
+                else
+                    refFill.dependents.push(aFill);
+    
                 aFill.offset = this._access.cellDistance(refFill.template.cell, template.cell);
             }
-    
             dataFills[this._access.cellRef(template.cell)] = aFill;
         });
     
         // Apply each fill onto the sheet.
         _.each(dataFills, fill => {
-            if (!fill.processed)
+            if (fill.processed)
+                return;
+            else if (fill.template.formula)
+                throw new Error(`Non-referencing formula found '${fill.extractor}'. Use a non-templated one!`);
+            else
                 this.applyFill(fill, data, fill.template.cell);
         });
 
@@ -146,7 +156,7 @@ class XlsxDataFill {
                 } else {
                     const val = this.extractValues(data, pair.extractor, cell);
                     if (val)
-                        this._access.setStyle(cell, pair.name, val);
+                        this._access.cellStyle(cell, pair.name, val);
                 }
             });
         }
@@ -162,21 +172,26 @@ class XlsxDataFill {
      * @ignore
      */
     parseTemplate(cell) {
-        // The options are in `this` argument.
-        const reMatch = (this._access.cellValue(cell) || '').match(this._opts.templateRegExp);
+        const value = this._access.cellValue(cell);
+        if (value == null || typeof value !== 'string')
+            return null;
         
-        if (!reMatch || !this._opts.followFormulae && this._access.cellType(cell) === 'formula') return null;
+        const reMatch = value.match(this._opts.templateRegExp);
+        if (!reMatch || !this._opts.followFormulae && this._access.cellType(cell) === 'formula') 
+            return null;
     
         const parts = reMatch[1].split(this._opts.fieldSplitter).map(_.trim),
-            styles = !parts[4] ? null : parts[4].split(",");
+            styles = !parts[4] ? null : parts[4].split(","),
+            extractor = parts[2] || "";
         
         if (parts.length < 2) 
-            throw new Error(`Not enough components of the template ${reMatch[0]}`);
+            throw new Error(`Not enough components of the template '${reMatch[0]}'`);
 
         return {
             reference: this._access.buildRef(cell, parts[0]),
             iterators: parts[1].split(/x|\*/).map(_.trim),
-            extractor: parts[2] || "",
+            extractor: extractor,
+            formula: extractor.startsWith("="),
             cell: cell,
             cellSize: this._access.cellSize(cell),
             padding: (parts[3] || "").split(/:|,|x|\*/).map(v => parseInt(v) || 0),
@@ -206,7 +221,9 @@ class XlsxDataFill {
         });
         
         return allTemplates
-            .sort((a, b) => a.reference == this._access.cellRef(b.cell) ? 1 : b.reference == this._access.cellRef(a.cell) ? -1 : 0)
+            .sort((a, b) => a.reference == this._access.cellRef(b.cell) > -1 
+                ? 1 
+                : b.reference == this._access.cellRef(a.cell) > -1 ? -1 : 0)
             .forEach(cb);
     }
 
@@ -215,7 +232,7 @@ class XlsxDataFill {
      * @param {{}} root The data root to be extracted values from.
      * @param {string} extractor The extraction string provided by the template. Usually a JSON path within the data `root`.
      * @param {Cell} cell A reference cell, if such exists.
-     * @returns {string|Array|Array.<Array.<*>>} The value to be used.
+     * @returns {string|number|Date|Array|Array.<Array.<*>>} The value to be used.
      * @description This method is used even when a whole - possibly rectangular - range is about to be set, so it can
      * return an array of arrays.
      * @ignore
@@ -295,7 +312,7 @@ class XlsxDataFill {
         // make sure, the 
         if (!entrySize || !entrySize.length) {
             this._access
-                .setValue(cell, value)
+                .cellValue(cell, value)
                 .copyStyle(cell, template.cell)
                 .copySize(cell, template.cell);
             this.applyDataStyle(cell, data, template);
@@ -314,7 +331,7 @@ class XlsxDataFill {
 
             this._access.getCellRange(cell, entrySize[0] - 1, entrySize[1] - 1).forEach((cell, ri, ci) => {
                 this._access
-                    .setValue(cell, value[ri][ci])
+                    .cellValue(cell, value[ri][ci])
                     .copyStyle(cell, template.cell)
                     .copySize(cell, template.cell);
                 this.applyDataStyle(cell, data[ri][ci], template);
@@ -352,11 +369,9 @@ class XlsxDataFill {
 
                 for (let f = 0; f < aFill.dependents.length; ++f) {
                     const inFill = aFill.dependents[f],
-                        inCell = this._access.offsetCell(nextCell, inFill.offset[0], inFill.offset[1]),
-                        innerSize = this.applyFill(inFill, inRoot, inCell);
-
-                    _.forEach(innerSize, sizeMaxxer);
-                    inFill.processed = true;
+                        inCell = this._access.offsetCell(nextCell, inFill.offset[0], inFill.offset[1]);
+                    
+                    _.forEach(this.applyFill(inFill, inRoot, inCell), sizeMaxxer);
                 }
 
                 // Now we have the inner data put and the size calculated.
@@ -380,7 +395,7 @@ class XlsxDataFill {
                     if (this._opts.mergeCells === true || this._opts.mergeCell === 'both'
                         || rowOffset > 1 && this._opts.mergeCells === 'vertical' 
                         || colOffset > 1 && this._opts.mergeCells === 'horizontal')
-                        this._access.setRangeMerged(rng, true);
+                        this._access.rangeMerged(rng, true);
 
                     rng.forEach(cell => this._access.copySize(cell, template.cell));
                 }
@@ -393,7 +408,82 @@ class XlsxDataFill {
             _.forEach(this._access.cellDistance(mainCell, nextCell), sizeMaxxer);
         }
 
+        _.forEach(aFill.formulas, f => this.applyFormula(f, entrySize, mainCell));
+
+        aFill.processed = true;
         return entrySize;
+    }
+
+    /**
+     * Process a formula be shifting all the fixed offset.
+     * @param {String} formula The formula to be shifted.
+     * @param {Array<Number,Number>} offset The offset of the referenced template to the formula one.
+     * @param {Array<Number,Number>} size The size of the ranges as they should be.
+     * @returns {String} The processed text.
+     */
+    shiftFormula(formula, offset, size) {
+        let newFormula = '';
+
+        for (;;) {
+            const match = formula.match(refRegExp);
+            if (!match) break;
+
+            let from = this._access.getCell(match[3], match[2]),
+                newRef = null;
+
+            if (offset[0] > 0 && offset[1] > 0)
+                from = this._access.offsetCell(from, offset[0], offset[1]);
+
+            newRef = !match[5]
+                ? this._access.cellRef(from, !!match[2])
+                : this._access.rangeRef(this._access.getCellRange(from, size[0], size[1]), !!match[2]);
+
+            newFormula += formula.substr(0, match.index) + newRef;
+            formula = formula.substr(match.index + match[0].length);
+        }
+
+        newFormula += formula;
+        return newFormula;
+    }
+
+    /**
+     * Apply the given formula in the sheet, i.e. changing it to match the 
+     * sizes of the references templates.
+     * @param {{}} aFill The fill to be applied, as constructed in the {@link fillData} method.
+     * @param {Array<Number>} entrySize The fill-to-size map, as constructed so far
+     * @param {Cell} cell The cell to put/start this formula into
+     * @returns {undefined}
+     * @ignore
+     */
+    applyFormula(aFill, entrySize, cell) {
+        cell = this._access.offsetCell(cell, aFill.offset[0], aFill.offset[1]);
+
+        const template = aFill.template,
+            iter = _.trim(template.iterators[0]),
+            offset = this._access.cellDistance(template.cell, cell);
+            
+        let formula = template.extractor, 
+            rng;
+            
+        aFill.processed = true;
+        this._access.cellValue(cell, null);
+
+        if (entrySize[0] < 2 && entrySize[1] < 2 || iter === 'all') {
+            formula = this.shiftFormula(formula, offset, [0, 0]);
+            rng = this._access.getCellRange(cell, entrySize[0] - 1, entrySize[1] - 1);
+        } else if (iter === 'cols') {
+            formula = this.shiftFormula(formula, offset, [entrySize[0] - 1, 0]);
+            rng = this._access.getCellRange(cell, 0, entrySize[1] - 1);
+        } else if (iter === 'rows') {
+            formula = this.shiftFormula(formula, offset, [0, entrySize[1] - 1]);
+            rng = this._access.getCellRange(cell, entrySize[0] - 1, 0);
+        } else { // i.e. 'none'
+            formula = this.shiftFormula(formula, offset, [entrySize[0] - 1, entrySize[1] - 1]);
+            this._access.cellFormula(cell, formula);
+            return;
+        }
+
+        this._access.rangeFormula(rng, formula);
     }
 }
 

@@ -23,6 +23,7 @@ Data fill engine, taking an instance of Excel sheet accessor and a JSON object a
     * _instance_
         * [.options(newOpts)](#XlsxDataFill+options) ⇒ [<code>XlsxDataFill</code>](#XlsxDataFill) \| <code>Object</code>
         * [.fillData(data)](#XlsxDataFill+fillData) ⇒ [<code>XlsxDataFill</code>](#XlsxDataFill)
+        * [.shiftFormula(formula, offset, size)](#XlsxDataFill+shiftFormula) ⇒ <code>String</code>
     * _static_
         * [.XlsxPopulateAccess](#XlsxDataFill.XlsxPopulateAccess) : [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
 
@@ -68,6 +69,20 @@ The main entry point for whole data population mechanism.
 | --- | --- | --- |
 | data | <code>Object</code> | The data to be applied. |
 
+<a name="XlsxDataFill+shiftFormula"></a>
+
+### xlsxDataFill.shiftFormula(formula, offset, size) ⇒ <code>String</code>
+Process a formula be shifting all the fixed offset.
+
+**Kind**: instance method of [<code>XlsxDataFill</code>](#XlsxDataFill)  
+**Returns**: <code>String</code> - The processed text.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| formula | <code>String</code> | The formula to be shifted. |
+| offset | <code>Array.&lt;Number, Number&gt;</code> | The offset of the referenced template to the formula one. |
+| size | <code>Array.&lt;Number, Number&gt;</code> | The size of the ranges as they should be. |
+
 <a name="XlsxDataFill.XlsxPopulateAccess"></a>
 
 ### XlsxDataFill.XlsxPopulateAccess : [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
@@ -85,22 +100,23 @@ but can be used as a reference for implementing custom spreadsheet accessors.
 * [XlsxPopulateAccess](#XlsxPopulateAccess)
     * [new XlsxPopulateAccess(workbook, XlsxPopulate)](#new_XlsxPopulateAccess_new)
     * [.workbook()](#XlsxPopulateAccess+workbook) ⇒ <code>Workbook</code>
-    * [.cellValue(cell)](#XlsxPopulateAccess+cellValue) ⇒ <code>string</code>
+    * [.cellValue(cell, value)](#XlsxPopulateAccess+cellValue) ⇒ <code>string</code> \| <code>\*</code> \| [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
     * [.cellType(cell)](#XlsxPopulateAccess+cellType) ⇒ <code>string</code>
-    * [.cellFormula(cell)](#XlsxPopulateAccess+cellFormula) ⇒ <code>string</code>
+    * [.cellFormula(cell, formula)](#XlsxPopulateAccess+cellFormula) ⇒ <code>string</code>
     * [.cellDistance(from, to)](#XlsxPopulateAccess+cellDistance) ⇒ <code>Array.&lt;Number&gt;</code>
     * [.cellSize(cell)](#XlsxPopulateAccess+cellSize) ⇒ <code>Array.&lt;Number&gt;</code>
-    * [.cellRef(cell)](#XlsxPopulateAccess+cellRef) ⇒ <code>string</code>
-    * [.buildRef(cell, adr)](#XlsxPopulateAccess+buildRef) ⇒ <code>string</code>
+    * [.cellStyle(cell, name, value)](#XlsxPopulateAccess+cellStyle) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
+    * [.cellRef(cell, withSheet)](#XlsxPopulateAccess+cellRef) ⇒ <code>string</code>
+    * [.buildRef(cell, adr, withSheet)](#XlsxPopulateAccess+buildRef) ⇒ <code>string</code>
     * [.getCell(address, sheetId)](#XlsxPopulateAccess+getCell) ⇒ <code>Cell</code>
     * [.getCellRange(cell, rowOffset, colOffset)](#XlsxPopulateAccess+getCellRange) ⇒ <code>Range</code>
     * [.offsetCell(cell, rows, cols)](#XlsxPopulateAccess+offsetCell) ⇒ <code>Cell</code>
-    * [.setRangeMerged(range, status)](#XlsxPopulateAccess+setRangeMerged) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
+    * [.rangeMerged(range, status)](#XlsxPopulateAccess+rangeMerged) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
+    * [.rangeFormula(range, formula)](#XlsxPopulateAccess+rangeFormula) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
+    * [.rangeRef(range, withSheet)](#XlsxPopulateAccess+rangeRef) ⇒ <code>String</code>
     * [.forAllCells(cb)](#XlsxPopulateAccess+forAllCells) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
     * [.copyStyle(dest, src)](#XlsxPopulateAccess+copyStyle) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
     * [.copySize(dest, src)](#XlsxPopulateAccess+copySize) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
-    * [.setValue(cell, value)](#XlsxPopulateAccess+setValue) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
-    * [.setStyle(cell, name, value)](#XlsxPopulateAccess+setStyle) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
 
 <a name="new_XlsxPopulateAccess_new"></a>
 
@@ -124,15 +140,16 @@ Returns the configured workbook for direct XlsxPopulate manipulation.
 **Returns**: <code>Workbook</code> - The workbook involved.  
 <a name="XlsxPopulateAccess+cellValue"></a>
 
-### xlsxPopulateAccess.cellValue(cell) ⇒ <code>string</code>
-Gets the textual representation of the cell value.
+### xlsxPopulateAccess.cellValue(cell, value) ⇒ <code>string</code> \| <code>\*</code> \| [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
+Gets/Sets the textual representation of the cell value.
 
 **Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
-**Returns**: <code>string</code> - The textual representation of cell's contents.  
+**Returns**: <code>string</code> - The textual representation of cell's contents.<code>\*</code> \| [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess) - Either the requested value or chainable this.  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | cell | <code>Cell</code> | The cell to retrieve the value from. |
+| value | <code>\*</code> | The requested value for setting. |
 
 <a name="XlsxPopulateAccess+cellType"></a>
 
@@ -149,15 +166,16 @@ Gets the textual representation of the cell value.
 
 <a name="XlsxPopulateAccess+cellFormula"></a>
 
-### xlsxPopulateAccess.cellFormula(cell) ⇒ <code>string</code>
+### xlsxPopulateAccess.cellFormula(cell, formula) ⇒ <code>string</code>
 Gets the formula from the cell or null, if there isn't any
 
 **Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
-**Returns**: <code>string</code> - The formula inside the cell.  
+**Returns**: <code>string</code> - The formula inside the cell or this for chaining.  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | cell | <code>Cell</code> | The cell to retrieve the value from. |
+| formula | <code>string</code> | the text of the formula to be set. |
 
 <a name="XlsxPopulateAccess+cellDistance"></a>
 
@@ -184,9 +202,23 @@ Determines the size of cell, taking into account if it is part of a merged range
 | --- | --- | --- |
 | cell | <code>Cell</code> | The cell to be investigated. |
 
+<a name="XlsxPopulateAccess+cellStyle"></a>
+
+### xlsxPopulateAccess.cellStyle(cell, name, value) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
+Sets a named style of a given cell.
+
+**Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
+**Returns**: [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess) - For invocation chaining.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| cell | <code>Cell</code> | The cell to be operated. |
+| name | <code>string</code> | The name of the style property to be set. |
+| value | <code>string</code> \| <code>object</code> | The value for this property to be set. |
+
 <a name="XlsxPopulateAccess+cellRef"></a>
 
-### xlsxPopulateAccess.cellRef(cell) ⇒ <code>string</code>
+### xlsxPopulateAccess.cellRef(cell, withSheet) ⇒ <code>string</code>
 Creates a reference Id for a given cell, based on its sheet and address.
 
 **Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
@@ -195,10 +227,11 @@ Creates a reference Id for a given cell, based on its sheet and address.
 | Param | Type | Description |
 | --- | --- | --- |
 | cell | <code>Cell</code> | The cell to create a reference Id to. |
+| withSheet | <code>boolean</code> | Whether to include the sheet name in the reference. Defaults to true. |
 
 <a name="XlsxPopulateAccess+buildRef"></a>
 
-### xlsxPopulateAccess.buildRef(cell, adr) ⇒ <code>string</code>
+### xlsxPopulateAccess.buildRef(cell, adr, withSheet) ⇒ <code>string</code>
 Build a reference string for a cell identified by @param adr, from the @param cell.
 
 **Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
@@ -208,6 +241,7 @@ Build a reference string for a cell identified by @param adr, from the @param ce
 | --- | --- | --- |
 | cell | <code>Cell</code> | A cell that is a base of the reference. |
 | adr | <code>string</code> | The address of the target cell, as mentioned in @param cell. |
+| withSheet | <code>boolean</code> | Whether to include the sheet name in the reference. Defaults to true. |
 
 <a name="XlsxPopulateAccess+getCell"></a>
 
@@ -250,9 +284,9 @@ Gets the cell at a certain offset from a given one.
 | rows | <code>int</code> | Number of rows to offset. |
 | cols | <code>int</code> | Number of columns to offset. |
 
-<a name="XlsxPopulateAccess+setRangeMerged"></a>
+<a name="XlsxPopulateAccess+rangeMerged"></a>
 
-### xlsxPopulateAccess.setRangeMerged(range, status) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
+### xlsxPopulateAccess.rangeMerged(range, status) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
 Merge or split range of cells.
 
 **Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
@@ -262,6 +296,32 @@ Merge or split range of cells.
 | --- | --- | --- |
 | range | <code>Range</code> | The range, as returned from [getCellRange](getCellRange) |
 | status | <code>boolean</code> | The merged status to be set. |
+
+<a name="XlsxPopulateAccess+rangeFormula"></a>
+
+### xlsxPopulateAccess.rangeFormula(range, formula) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
+Sets a formula for the whole range. If it contains only one - it is set directly.
+
+**Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
+**Returns**: [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess) - For chain invokes.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| range | <code>Range</code> | The range, as returned from [getCellRange](getCellRange) |
+| formula | <code>String</code> | The formula to be set. |
+
+<a name="XlsxPopulateAccess+rangeRef"></a>
+
+### xlsxPopulateAccess.rangeRef(range, withSheet) ⇒ <code>String</code>
+Return the string representation of a given range.
+
+**Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
+**Returns**: <code>String</code> - The string, representing the given range.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| range | <code>Range</code> | The range which address we're interested in. |
+| withSheet | <code>boolean</code> | Whether to include sheet name in the address. |
 
 <a name="XlsxPopulateAccess+forAllCells"></a>
 
@@ -300,31 +360,4 @@ Resize the column and row of the destination cell, if not changed already.
 | --- | --- | --- |
 | dest | <code>Cell</code> | The destination cell which row and column to resize. |
 | src | <code>Cell</code> | The source (template) cell to take the size from. |
-
-<a name="XlsxPopulateAccess+setValue"></a>
-
-### xlsxPopulateAccess.setValue(cell, value) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
-Sets a value in the cell.
-
-**Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
-**Returns**: [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess) - For invocation chaining.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| cell | <code>Cell</code> | The cell to be operated. |
-| value | <code>string</code> | The string value to be set inside. |
-
-<a name="XlsxPopulateAccess+setStyle"></a>
-
-### xlsxPopulateAccess.setStyle(cell, name, value) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
-Sets a named style of a given cell.
-
-**Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
-**Returns**: [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess) - For invocation chaining.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| cell | <code>Cell</code> | The cell to be operated. |
-| name | <code>string</code> | The name of the style property to be set. |
-| value | <code>string</code> \| <code>object</code> | The value for this property to be set. |
 

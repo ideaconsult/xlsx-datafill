@@ -1,5 +1,8 @@
 {
-	"library": "Demo library set example",
+	"library": {
+		"name": "Demo library set example",
+		"count": 15
+	},
 	"publishers": [ "Penguin", "Harcourt Brace", "Random House", "Harper Perennial", "Signet Classics", "The Canons" ],
 	"books": [{
 		"title": "Northanger Abbey",
