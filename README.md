@@ -47,7 +47,7 @@ The template defines that the _data_ should be extracted from `rows` - which res
 
 So far, the data was extracted from the root of the initially provided JavaScript object. However, each template can refer another one, taking the data extracted from it, as a basis for its own processing.
 
-Consider this spreadsheet:
+<a id="nested-blocks">Nested blocks</a>. Consider this spreadsheet:
 
 |      | A                       | B                       | C    | D    | E    | F    |
 | ---- | ----------------------- | ----------------------- | ---- | ---- | ---- | ---- |
@@ -193,12 +193,67 @@ Here are the options and their defaults.
     templateRegExp: new RegExp(/\{\{([^}]*)\}\}/),
     fieldSplitter: "|",
     joinText: ",",
+    mergeCells: true,
+    followFormulae: false,
     callbacksMap: {
         "": data => _.keys(data)
     }
 };
 
 ```
+
+## <a id="formulae-handling">Formulae handling</a>
+
+As formulas are a key Excel feature, so `xlsx-datafill` is trying to keep them alive and meaningful. As a basic rule _Raw formulas are kept as they are, only those put in a template format, are handled_.
+
+So, the [template format](#template-format) has slightly different version:
+
+* `iterators` determine how the formula will be populated, and is one of the following values: `all`, `rows`, `cols` or `none`. The latter can be replaced with an empty value.
+* `extractor` is the actual formula and **must** start with `=` so the engine recognizes it as such.
+* `reference` should be present, otherwise an error will be issued. If a non-referenced formula is needed - just don’t use the template format.
+
+Two operations are performed during data population of the referenced template - _formula alteration_ and _formula population_. How this happens depends on the value inside `iterators` field:
+
+* When `none` is selected, the formula is not populated - The ranges inside it are expanded to match the size of the referenced data block.
+* When `cols` is selected, the formula is populated across the columns of referenced data block, while each range inside the formula is expanded across the rows of the data block.
+* When `rows` is selected, the population and expanding processes are reversed - the formula is populated across rows, and the ranges inside are expanded across columns.
+* Finally, when `all` is selected - the formula is not expanded - it is just populated across the same area of cells, as the referenced data block.
+
+It is important to note, that the formula population starts from the cell with the _formula_ template, or one with the same offset, as the current data block - review the [nested blocks](#nested-blocks) concept for more information.
+
+### Few examples
+
+Consider the following template (and the same data as the previous examples):
+
+|      | A                       | B                         | C    | D    | E    | F    |
+| ---- | :---------------------- | ------------------------- | ---- | ---- | ---- | ---- |
+| 1    | {{ \| rows \| header }} | {{ \| rows * data \| }}   |      |      |      |      |
+| 2    |                         |                           |      |      |      |      |
+| 3    |                         |                           |      |      |      |      |
+| 4    | Formula:                | {{ B1 \|\| =SUM(B1:B1) }} |      |      |      |      |
+
+Will result in the following output table:
+|      | A        | B    | C    | D    | E    | F    |
+| ---- | -------- | ---- | ---- | ---- | ---- | ---- |
+| 1    | Row 1    | 11   | 12   | 13   | 14   | 15   |
+| 2    | Row 2    | 21   | 22   | 23   | 24   | 25   |
+| 3    | Row 3    | 31   | 32   | 33   | 34   | 35   |
+| 4    | Formula: | 345  |      |      |      |      |
+
+With the formula inside `B4` being altered to `=SUM(B1:F3)`. The skipped `iterators` field is synonym of `none`, therefore - no population, just expansion.
+
+If the _formula template_ was this one: `{{ B1 | cols | =SUM(B1:B1) }}`, then the resulting table would be this:
+
+|      | A        | B    | C    | D    | E    | F    |
+| ---- | -------- | ---- | ---- | ---- | ---- | ---- |
+| 1    | Row 1    | 11   | 12   | 13   | 14   | 15   |
+| 2    | Row 2    | 21   | 22   | 23   | 24   | 25   |
+| 3    | Row 3    | 31   | 32   | 33   | 34   | 35   |
+| 4    | Formula: | 63   | 66   | 69   | 72   | 75   |
+
+The formula was populated across the columns, with each one being expanded across rows, i.e. the formula in `C4` will be `=SUM(C1:C3)`.
+
+Specifying `all` as _iterators_ keyword will result in the same size (3x5 in this example) table. It _does_ make sense if it includes anchored references, i.e a template like this `{{ B1 | all | =B1 * $A$5 }}` will result in a 3x5 table, starting from `B4`, with each value from `B1:F3` being multiplied by the value in `A5`. For example the formula in `C4` would be `C1 * $A$5`.
 
 ## Some important notes
 
