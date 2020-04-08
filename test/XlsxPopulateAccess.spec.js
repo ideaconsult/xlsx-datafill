@@ -12,7 +12,7 @@ describe("XlsxPopulateAccess", () => {
     });
 
     it("reads workbook's cells", () => {
-        expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe("{{ | | library }}");
+        expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe("{{ | | library.name }}");
         expect(xlsxAccess.cellValue(xlsxAccess.getCell("A2"))).toBe("Book Title");
         expect(xlsxAccess.cellValue(xlsxAccess.getCell("B3"))).toBe("{{ A3 | | author }}");
     });
@@ -42,7 +42,7 @@ describe("XlsxPopulateAccess", () => {
     it("properly sets value", () => {
         const cell = xlsxAccess.getCell("A4"),
             theValue = "This is a test value!";
-        xlsxAccess.setValue(cell, theValue);
+        xlsxAccess.cellValue(cell, theValue);
         expect(xlsxAccess.cellValue(cell)).toBe(theValue);
     });
 });
