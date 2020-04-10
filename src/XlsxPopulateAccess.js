@@ -293,31 +293,23 @@ class XlsxPopulateAccess {
      * @returns {XlsxPopulateAccess} For invocation chaining.
      */
     copyStyle(dest, src) {
+        if (!src || !dest) throw new Error("Crash! Null 'src' or 'dest' for copyStyle()!");
         if (src == dest) return this;
 
         if (src._style !== undefined)
             dest.style(src._style);
         else if (src._styleId > 0)
             dest._styleId = src._styleId;
-        
-        return this;
-    }
 
-    /**
-     * Resize the column and row of the destination cell, if not changed already.
-     * @param {Cell} dest The destination cell which row and column to resize.
-     * @param {Cell} src The source (template) cell to take the size from.
-     * @returns {XlsxPopulateAccess} For invocation chaining.
-     */
-    copySize(dest, src) {
-        const row = dest.rowNumber(),
-            col = dest.columnNumber();
+        const destSheetId = dest.sheet().name(),
+            rowId = `'${destSheetId}':${dest.rowNumber()}`,
+            colId = `'${destSheetId}':${dest.columnNumber()}`;
 
-        if (this._rowSizes[row] === undefined)
-            dest.row().height(this._rowSizes[row] = src.row().height());
+        if (this._rowSizes[rowId] === undefined)
+            dest.row().height(this._rowSizes[rowId] = src.row().height());
         
-        if (this._colSizes[col] === undefined)
-            dest.column().width(this._colSizes[col] = src.column().width());
+        if (this._colSizes[colId] === undefined)
+            dest.column().width(this._colSizes[colId] = src.column().width());
 
         return this;
     }

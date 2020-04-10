@@ -75,7 +75,8 @@ class XlsxDataFill {
             if (template.reference) {
                 const refFill = dataFills[template.reference];
                 
-                if (!refFill) throw new Error(`Unable to find a reference '${template.reference}'!`);
+                if (!refFill) 
+                    throw new Error(`Unable to find a reference '${template.reference}'!`);
                 
                 if (template.formula) 
                     refFill.formulas.push(aFill);
@@ -182,13 +183,16 @@ class XlsxDataFill {
     
         const parts = reMatch[1].split(this._opts.fieldSplitter).map(_.trim),
             styles = !parts[4] ? null : parts[4].split(","),
-            extractor = parts[2] || "";
+            extractor = parts[2] || "",
+            cellRef = this._access.buildRef(cell, parts[0]);
         
         if (parts.length < 2) 
             throw new Error(`Not enough components of the template '${reMatch[0]}'`);
+        if (!!parts[0] && !cellRef)
+            throw new Error(`Invalid reference passed: '${parts[0]}'`);
 
         return {
-            reference: this._access.buildRef(cell, parts[0]),
+            reference: cellRef,
             iterators: parts[1].split(/x|\*/).map(_.trim),
             extractor: extractor,
             formula: extractor.startsWith("="),
@@ -221,9 +225,7 @@ class XlsxDataFill {
         });
         
         return allTemplates
-            .sort((a, b) => a.reference == this._access.cellRef(b.cell) > -1 
-                ? 1 
-                : b.reference == this._access.cellRef(a.cell) > -1 ? -1 : 0)
+            .sort((a, b) => b.reference == this._access.cellRef(a.cell) || !a.reference ? -1 : 1)
             .forEach(cb);
     }
 
@@ -306,15 +308,17 @@ class XlsxDataFill {
      * @ignore
      */
     putValues(cell, data, template) {
+        if (!cell) throw new Error("Crash! Null reference cell in 'putValues()'!");
+
         let entrySize = data.sizes,
             value = this.extractValues(data, template.extractor, cell);
+
 
         // make sure, the 
         if (!entrySize || !entrySize.length) {
             this._access
                 .cellValue(cell, value)
-                .copyStyle(cell, template.cell)
-                .copySize(cell, template.cell);
+                .copyStyle(cell, template.cell);
             this.applyDataStyle(cell, data, template);
             entrySize = template.cellSize;
         } else if (entrySize.length <= 2) {
@@ -332,8 +336,7 @@ class XlsxDataFill {
             this._access.getCellRange(cell, entrySize[0] - 1, entrySize[1] - 1).forEach((cell, ri, ci) => {
                 this._access
                     .cellValue(cell, value[ri][ci])
-                    .copyStyle(cell, template.cell)
-                    .copySize(cell, template.cell);
+                    .copyStyle(cell, template.cell);
                 this.applyDataStyle(cell, data[ri][ci], template);
             });
         } else {
@@ -397,7 +400,7 @@ class XlsxDataFill {
                         || colOffset > 1 && this._opts.mergeCells === 'horizontal')
                         this._access.rangeMerged(rng, true);
 
-                    rng.forEach(cell => this._access.copySize(cell, template.cell));
+                    rng.forEach(cell => this._access.copyStyle(cell, template.cell));
                 }
 
                 // Finally, calculate the next cell.
@@ -431,7 +434,7 @@ class XlsxDataFill {
             let from = this._access.getCell(match[3], match[2]),
                 newRef = null;
 
-            if (offset[0] > 0 && offset[1] > 0)
+            if (offset[0] > 0 || offset[1] > 0)
                 from = this._access.offsetCell(from, offset[0], offset[1]);
 
             newRef = !match[5]
@@ -468,7 +471,7 @@ class XlsxDataFill {
         aFill.processed = true;
         this._access.cellValue(cell, null);
 
-        if (entrySize[0] < 2 && entrySize[1] < 2 || iter === 'all') {
+        if (entrySize[0] < 2 && entrySize[1] < 2 || iter === 'both') {
             formula = this.shiftFormula(formula, offset, [0, 0]);
             rng = this._access.getCellRange(cell, entrySize[0] - 1, entrySize[1] - 1);
         } else if (iter === 'cols') {

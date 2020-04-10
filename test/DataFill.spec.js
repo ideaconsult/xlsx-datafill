@@ -121,22 +121,32 @@ describe("XlsxDataFill: ", () => {
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B8", "Ref"))).toBe('SUM(B2:F4)'); // 345
         });
 
-        it("expanded and copied the formula properly", () => {
+        it("expanded and spread the formula properly", () => {
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B7", "Ref"))).toBe('SUM(B2:B4)'); // 63;
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C7", "Ref"))).toBe('SHARED'); // SUM(C2:C4) == 66;
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("F7", "Ref"))).toBe('SHARED'); // SUM(F2:F4) == 75;
         });
 
-        it("expanded & copied the formula properly with external multiplication", () => {
+        it("expanded & spread the formula properly with external multiplication", () => {
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B9", "Ref"))).toBe('SUM(B2:B4) * $A$6'); // 126;
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C9", "Ref"))).toBe('SHARED'); // SUM(C2:C4) == 132;
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("F9", "Ref"))).toBe('SHARED'); // SUM(F2:F4) * $A$6 == 150;
         });
 
-        it("it multiplied the formula properly", () => {
+        it("it spread the formula properly", () => {
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B10", "Ref"))).toBe('B2 * $A$6'); // 22;
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C11", "Ref"))).toBe('SHARED'); // C3 * $A$6 == 44;
             expect(xlsxAccess.cellFormula(xlsxAccess.getCell("D12", "Ref"))).toBe('SHARED'); // D4 * $A$6 == 66;
+        });
+        
+        it("it spread the formula on a nested reference properly", () => {
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B7", "Split"))).toBe('SUM(B2:F2)'); // 65;
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B9", "Split"))).toBe('SUM(B4:F4)'); // 165;
+        });
+
+        it("it spread the formula on a nested reference with anchored cell properly", () => {
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C7", "Split"))).toBe('SUM(B2:F2) * $A$6'); // 130;
+            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C9", "Split"))).toBe('SUM(B4:F4) * $A$6'); // 330
         });
     });
 
