@@ -114,39 +114,39 @@ describe("XlsxDataFill: ", () => {
 
         it("didn't copy the formula", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("A7", "NoRef"))).not.toBe(docsData.title);
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("A7", "NoRef"))).toBe("A1");
+            expect(xlsxAccess.getCell("A7", "NoRef").formula()).toBe("A1");
         });
         
         it("expanded the formula properly", () => {
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B8", "Ref"))).toBe('SUM(B2:F4)'); // 345
+            expect(xlsxAccess.getCell("B8", "Ref").formula()).toBe('SUM(B2:F4)'); // 345
         });
 
         it("expanded and spread the formula properly", () => {
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B7", "Ref"))).toBe('SUM(B2:B4)'); // 63;
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C7", "Ref"))).toBe('SHARED'); // SUM(C2:C4) == 66;
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("F7", "Ref"))).toBe('SHARED'); // SUM(F2:F4) == 75;
+            expect(xlsxAccess.getCell("B7", "Ref").formula()).toBe('SUM(B2:B4)'); // 63;
+            expect(xlsxAccess.getCell("C7", "Ref").formula()).toBe('SHARED'); // SUM(C2:C4) == 66;
+            expect(xlsxAccess.getCell("F7", "Ref").formula()).toBe('SHARED'); // SUM(F2:F4) == 75;
         });
 
         it("expanded & spread the formula properly with external multiplication", () => {
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B9", "Ref"))).toBe('SUM(B2:B4) * $A$6'); // 126;
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C9", "Ref"))).toBe('SHARED'); // SUM(C2:C4) == 132;
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("F9", "Ref"))).toBe('SHARED'); // SUM(F2:F4) * $A$6 == 150;
+            expect(xlsxAccess.getCell("B9", "Ref").formula()).toBe('SUM(B2:B4) * $A$6'); // 126;
+            expect(xlsxAccess.getCell("C9", "Ref").formula()).toBe('SHARED'); // SUM(C2:C4) == 132;
+            expect(xlsxAccess.getCell("F9", "Ref").formula()).toBe('SHARED'); // SUM(F2:F4) * $A$6 == 150;
         });
 
         it("it spread the formula properly", () => {
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B10", "Ref"))).toBe('B2 * $A$6'); // 22;
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C11", "Ref"))).toBe('SHARED'); // C3 * $A$6 == 44;
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("D12", "Ref"))).toBe('SHARED'); // D4 * $A$6 == 66;
+            expect(xlsxAccess.getCell("B10", "Ref").formula()).toBe('B2 * $A$6'); // 22;
+            expect(xlsxAccess.getCell("C11", "Ref").formula()).toBe('SHARED'); // C3 * $A$6 == 44;
+            expect(xlsxAccess.getCell("D12", "Ref").formula()).toBe('SHARED'); // D4 * $A$6 == 66;
         });
         
         it("it spread the formula on a nested reference properly", () => {
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B7", "Split"))).toBe('SUM(B2:F2)'); // 65;
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("B9", "Split"))).toBe('SUM(B4:F4)'); // 165;
+            expect(xlsxAccess.getCell("B7", "Split").formula()).toBe('SUM(B2:F2)'); // 65;
+            expect(xlsxAccess.getCell("B9", "Split").formula()).toBe('SUM(B4:F4)'); // 165;
         });
 
         it("it spread the formula on a nested reference with anchored cell properly", () => {
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C7", "Split"))).toBe('SUM(B2:F2) * $A$6'); // 130;
-            expect(xlsxAccess.cellFormula(xlsxAccess.getCell("C9", "Split"))).toBe('SUM(B4:F4) * $A$6'); // 330
+            expect(xlsxAccess.getCell("C7", "Split").formula()).toBe('SUM(B2:F2) * $A$6'); // 130;
+            expect(xlsxAccess.getCell("C9", "Split").formula()).toBe('SUM(B4:F4) * $A$6'); // 330
         });
     });
 

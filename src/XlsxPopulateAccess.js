@@ -70,20 +70,24 @@ class XlsxPopulateAccess {
     }
 
     /**
-     * Gets/Sets the textual representation of the cell value.
+     * Gets the textual representation of the cell value.
+     * @param {Cell} cell - The cell to retrieve the value from.
+     * @returns {string} The textual representation of cell's contents.
+     */
+    cellValue(cell) {
+        const theValue = cell.value();
+        return theValue instanceof _RichText ? theValue.text() : theValue;
+    }
+
+    /**
+     * Sets the cell value.
      * @param {Cell} cell - The cell to retrieve the value from.
      * @param {*} value - The requested value for setting.
-     * @returns {string} The textual representation of cell's contents.
-     * @returns {*|XlsxPopulateAccess} Either the requested value or chainable this.
+     * @returns {XlsxPopulateAccess} Either the requested value or chainable this.
      */
-    cellValue(cell, value) {
-        if (value !== undefined) {
-            cell.value(value);
-            return this;
-        } else {
-            const theValue = cell.value();
-            return theValue instanceof _RichText ? theValue.text() : theValue;
-        }
+    setCellValue(cell, value) {
+        cell.value(value);
+        return this;
     }
 
     /**
@@ -108,17 +112,14 @@ class XlsxPopulateAccess {
     }
 
     /**
-     * Gets the formula from the cell or null, if there isn't any
+     * Sets the formula in the cell
      * @param {Cell} cell - The cell to retrieve the value from.
      * @param {string} formula - the text of the formula to be set.
-     * @returns {string} The formula inside the cell or this for chaining.
+     * @returns {XlsxPopulateAccess} For chaining.
      */
-    cellFormula(cell, formula) {
-        if (formula !== undefined) {
-            cell.formula(_.trimStart(formula, ' ='));
-            return this;
-        } else
-            return cell.formula();
+    setCellFormula(cell, formula) {
+        cell.formula(_.trimStart(formula, ' ='));
+        return this;
     }
 
     /**
@@ -163,13 +164,9 @@ class XlsxPopulateAccess {
      * @param {string|object} value The value for this property to be set.
      * @returns {XlsxPopulateAccess} For invocation chaining.
      */
-    cellStyle(cell, name, value) {
-        if (value !== undefined) {
-            cell.style(name, value);
-            return this;
-        } else {
-            return cell.style(name);
-        }
+    setCellStyle(cell, name, value) {
+        cell.style(name, value);
+        return this;
     }
 
     /**
@@ -251,13 +248,9 @@ class XlsxPopulateAccess {
      * @param {String} formula The formula to be set.
      * @returns {XlsxPopulateAccess} For chain invokes.
      */
-    rangeFormula(range, formula) {
-        if (formula !== undefined) {
-            range.formula(_.trimStart(formula, ' ='));
-            return this;
-        } else {
-            return range.formula();
-        }
+    setRangeFormula(range, formula) {
+        range.formula(_.trimStart(formula, ' ='));
+        return this;
     }
 
     /**

@@ -42,7 +42,7 @@ describe("XlsxPopulateAccess", () => {
     it("properly sets value", () => {
         const cell = xlsxAccess.getCell("A4"),
             theValue = "This is a test value!";
-        xlsxAccess.cellValue(cell, theValue);
+        xlsxAccess.setCellValue(cell, theValue);
         expect(xlsxAccess.cellValue(cell)).toBe(theValue);
     });
 });

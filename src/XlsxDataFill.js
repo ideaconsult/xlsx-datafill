@@ -157,7 +157,7 @@ class XlsxDataFill {
                 } else {
                     const val = this.extractValues(data, pair.extractor, cell);
                     if (val)
-                        this._access.cellStyle(cell, pair.name, val);
+                        this._access.setCellStyle(cell, pair.name, val);
                 }
             });
         }
@@ -317,7 +317,7 @@ class XlsxDataFill {
         // make sure, the 
         if (!entrySize || !entrySize.length) {
             this._access
-                .cellValue(cell, value)
+                .setCellValue(cell, value)
                 .copyStyle(cell, template.cell);
             this.applyDataStyle(cell, data, template);
             entrySize = template.cellSize;
@@ -335,7 +335,7 @@ class XlsxDataFill {
 
             this._access.getCellRange(cell, entrySize[0] - 1, entrySize[1] - 1).forEach((cell, ri, ci) => {
                 this._access
-                    .cellValue(cell, value[ri][ci])
+                    .setCellValue(cell, value[ri][ci])
                     .copyStyle(cell, template.cell);
                 this.applyDataStyle(cell, data[ri][ci], template);
             });
@@ -469,7 +469,7 @@ class XlsxDataFill {
             rng;
             
         aFill.processed = true;
-        this._access.cellValue(cell, null);
+        this._access.setCellValue(cell, null);
 
         if (entrySize[0] < 2 && entrySize[1] < 2 || iter === 'both') {
             formula = this.shiftFormula(formula, offset, [0, 0]);
@@ -481,12 +481,11 @@ class XlsxDataFill {
             formula = this.shiftFormula(formula, offset, [0, entrySize[1] - 1]);
             rng = this._access.getCellRange(cell, entrySize[0] - 1, 0);
         } else { // i.e. 'none'
-            formula = this.shiftFormula(formula, offset, [entrySize[0] - 1, entrySize[1] - 1]);
-            this._access.cellFormula(cell, formula);
+            this._access.setCellFormula(cell, this.shiftFormula(formula, offset, [entrySize[0] - 1, entrySize[1] - 1]));
             return;
         }
 
-        this._access.rangeFormula(rng, formula);
+        this._access.setRangeFormula(rng, formula);
     }
 }
 
