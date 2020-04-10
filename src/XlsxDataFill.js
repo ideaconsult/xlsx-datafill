@@ -471,7 +471,7 @@ class XlsxDataFill {
         aFill.processed = true;
         this._access.cellValue(cell, null);
 
-        if (entrySize[0] < 2 && entrySize[1] < 2 || iter === 'all') {
+        if (entrySize[0] < 2 && entrySize[1] < 2 || iter === 'both') {
             formula = this.shiftFormula(formula, offset, [0, 0]);
             rng = this._access.getCellRange(cell, entrySize[0] - 1, entrySize[1] - 1);
         } else if (iter === 'cols') {
