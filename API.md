@@ -116,7 +116,6 @@ but can be used as a reference for implementing custom spreadsheet accessors.
     * [.rangeRef(range, withSheet)](#XlsxPopulateAccess+rangeRef) ⇒ <code>String</code>
     * [.forAllCells(cb)](#XlsxPopulateAccess+forAllCells) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
     * [.copyStyle(dest, src)](#XlsxPopulateAccess+copyStyle) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
-    * [.copySize(dest, src)](#XlsxPopulateAccess+copySize) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
 
 <a name="new_XlsxPopulateAccess_new"></a>
 
@@ -347,17 +346,4 @@ Copies the styles from `src` cell to the `dest`-ination one.
 | --- | --- | --- |
 | dest | <code>Cell</code> | Destination cell. |
 | src | <code>Cell</code> | Source cell. |
-
-<a name="XlsxPopulateAccess+copySize"></a>
-
-### xlsxPopulateAccess.copySize(dest, src) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
-Resize the column and row of the destination cell, if not changed already.
-
-**Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
-**Returns**: [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess) - For invocation chaining.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| dest | <code>Cell</code> | The destination cell which row and column to resize. |
-| src | <code>Cell</code> | The source (template) cell to take the size from. |
 

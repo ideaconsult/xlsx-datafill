@@ -318,8 +318,7 @@ class XlsxDataFill {
         if (!entrySize || !entrySize.length) {
             this._access
                 .cellValue(cell, value)
-                .copyStyle(cell, template.cell)
-                .copySize(cell, template.cell);
+                .copyStyle(cell, template.cell);
             this.applyDataStyle(cell, data, template);
             entrySize = template.cellSize;
         } else if (entrySize.length <= 2) {
@@ -337,8 +336,7 @@ class XlsxDataFill {
             this._access.getCellRange(cell, entrySize[0] - 1, entrySize[1] - 1).forEach((cell, ri, ci) => {
                 this._access
                     .cellValue(cell, value[ri][ci])
-                    .copyStyle(cell, template.cell)
-                    .copySize(cell, template.cell);
+                    .copyStyle(cell, template.cell);
                 this.applyDataStyle(cell, data[ri][ci], template);
             });
         } else {
@@ -402,7 +400,7 @@ class XlsxDataFill {
                         || colOffset > 1 && this._opts.mergeCells === 'horizontal')
                         this._access.rangeMerged(rng, true);
 
-                    rng.forEach(cell => this._access.copySize(cell, template.cell));
+                    rng.forEach(cell => this._access.copyStyle(cell, template.cell));
                 }
 
                 // Finally, calculate the next cell.
