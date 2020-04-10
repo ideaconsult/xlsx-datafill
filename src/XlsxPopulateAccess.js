@@ -294,6 +294,7 @@ class XlsxPopulateAccess {
      */
     copyStyle(dest, src) {
         if (src == dest) return this;
+        if (!src || !dest) throw new Error("Crash! Null 'src' or 'dest' for copyStyle()!");
 
         if (src._style !== undefined)
             dest.style(src._style);
