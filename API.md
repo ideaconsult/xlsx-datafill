@@ -23,7 +23,6 @@ Data fill engine, taking an instance of Excel sheet accessor and a JSON object a
     * _instance_
         * [.options(newOpts)](#XlsxDataFill+options) ⇒ [<code>XlsxDataFill</code>](#XlsxDataFill) \| <code>Object</code>
         * [.fillData(data)](#XlsxDataFill+fillData) ⇒ [<code>XlsxDataFill</code>](#XlsxDataFill)
-        * [.shiftFormula(formula, offset, size)](#XlsxDataFill+shiftFormula) ⇒ <code>String</code>
     * _static_
         * [.XlsxPopulateAccess](#XlsxDataFill.XlsxPopulateAccess) : [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
 
@@ -42,6 +41,7 @@ Constructs a new instance of XlsxDataFill with given options.
 | opts.joinText | <code>string</code> | The string to be used when the extracted value for a single cell is an array,  and it needs to be joined. Default is `,`. |
 | opts.mergeCells | <code>string</code> \| <code>boolean</code> | Whether to merge the higher dimension cells in the output. Default is true. |
 | opts.followFormulae | <code>boolean</code> | If a template is located as a result of a formula, whether to still process it. Default is false. |
+| opts.leaveStyle | <code>boolean</code> | Leave the style of the cells, as they are - don't copy from the template. Still the template styling _is_ applied. Default is false. |
 | opts.callbacksMap | <code>object.&lt;string, function()&gt;</code> | A map of handlers to be used for data and value extraction. There is one default - the empty one, for object key extraction. |
 
 <a name="XlsxDataFill+options"></a>
@@ -68,20 +68,6 @@ The main entry point for whole data population mechanism.
 | Param | Type | Description |
 | --- | --- | --- |
 | data | <code>Object</code> | The data to be applied. |
-
-<a name="XlsxDataFill+shiftFormula"></a>
-
-### xlsxDataFill.shiftFormula(formula, offset, size) ⇒ <code>String</code>
-Process a formula be shifting all the fixed offset.
-
-**Kind**: instance method of [<code>XlsxDataFill</code>](#XlsxDataFill)  
-**Returns**: <code>String</code> - The processed text.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| formula | <code>String</code> | The formula to be shifted. |
-| offset | <code>Array.&lt;Number, Number&gt;</code> | The offset of the referenced template to the formula one. |
-| size | <code>Array.&lt;Number, Number&gt;</code> | The size of the ranges as they should be. |
 
 <a name="XlsxDataFill.XlsxPopulateAccess"></a>
 
