@@ -9,7 +9,7 @@ Each template follows a specific format and structure, and it defines these cruc
 * How are the values for the cells extracted from the data?
 * How are the cell styles tweaked?
 
-All these in the context of the provided JavaScript object.
+All these in the context of the provided JavaScript object. If you've alrady know the story - check the [API](./API.md).
 
 ## Few examples that explain it all
 

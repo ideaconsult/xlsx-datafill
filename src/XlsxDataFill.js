@@ -8,6 +8,7 @@ const defaultOpts = {
     joinText: ",",
     mergeCells: true,
     followFormulae: false,
+    leaveStyle: false,
     callbacksMap: {
         "": data => _.keys(data)
     }
@@ -31,6 +32,8 @@ class XlsxDataFill {
      * @param {string|boolean} opts.mergeCells Whether to merge the higher dimension cells in the output. Default is true.
      * @param {boolean} opts.followFormulae If a template is located as a result of a formula, whether to still process it.
      * Default is false.
+     * @param {boolean} opts.leaveStyle Leave the style of the cells, as they are - don't copy from the template. Still the
+     * template styling _is_ applied. Default is false.
      * @param {object.<string, function>} opts.callbacksMap A map of handlers to be used for data and value extraction.
      * There is one default - the empty one, for object key extraction.
      */
@@ -149,6 +152,9 @@ class XlsxDataFill {
      */
     applyDataStyle(cell, data, template) {
         const styles = template.styles;
+
+        if (!this._opts.leaveStyle)
+            this._access.copyStyle(cell, template.cell);
         
         if (styles && data) {
             _.each(styles, pair => {
@@ -316,9 +322,7 @@ class XlsxDataFill {
 
         // make sure, the 
         if (!entrySize || !entrySize.length) {
-            this._access
-                .setCellValue(cell, value)
-                .copyStyle(cell, template.cell);
+            this._access.setCellValue(cell, value);
             this.applyDataStyle(cell, data, template);
             entrySize = template.cellSize;
         } else if (entrySize.length <= 2) {
@@ -334,9 +338,7 @@ class XlsxDataFill {
             }
 
             this._access.getCellRange(cell, entrySize[0] - 1, entrySize[1] - 1).forEach((cell, ri, ci) => {
-                this._access
-                    .setCellValue(cell, value[ri][ci])
-                    .copyStyle(cell, template.cell);
+                this._access.setCellValue(cell, value[ri][ci]);
                 this.applyDataStyle(cell, data[ri][ci], template);
             });
         } else {
@@ -400,7 +402,7 @@ class XlsxDataFill {
                         || colOffset > 1 && this._opts.mergeCells === 'horizontal')
                         this._access.rangeMerged(rng, true);
 
-                    rng.forEach(cell => this._access.copyStyle(cell, template.cell));
+                    rng.forEach(cell => this.applyDataStyle(cell, inRoot, template));
                 }
 
                 // Finally, calculate the next cell.
@@ -423,6 +425,7 @@ class XlsxDataFill {
      * @param {Array<Number,Number>} offset The offset of the referenced template to the formula one.
      * @param {Array<Number,Number>} size The size of the ranges as they should be.
      * @returns {String} The processed text.
+     * @ignore
      */
     shiftFormula(formula, offset, size) {
         let newFormula = '';
