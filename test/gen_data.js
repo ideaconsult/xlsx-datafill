@@ -13,6 +13,9 @@ const generateMultiD = function (shape) {
                 data: []
             };
             
+            if (curDim > 0)
+                res.header += ` - ${dims[curDim - 1]}`;
+                
             for (let i = 0; i < shape[curDim]; ++i) {
                 dims[curDim] = i + 1;
                 res.data.push(_gen1D(curDim + 1, dims));
