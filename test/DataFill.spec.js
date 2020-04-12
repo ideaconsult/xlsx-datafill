@@ -11,6 +11,7 @@ const XlsxPopulateAccess = XlsxDataFill.XlsxPopulateAccess;
 const docsData = require("../examples/docs-data.json");
 const bookData = require("../examples/book-data.json");
 const stockData = require("../examples/stock-data.json");
+const genData5D = require("../examples/gen-data-5d.json");
 
 const processData = async (path, data, handlers, opts) => {
     const wb = await XlsxPopulate.fromFileAsync(path);
@@ -324,6 +325,57 @@ describe("XlsxDataFill: ", () => {
             // expect(xlsxAccess.getCell("B3", "Nested").style("fill").color).toEqual({ rgb: "EEEEEE" });
             // expect(xlsxAccess.getCell("A5", "Raw").style("fill").color).toEqual({ rgb: "EEEEEE" });
             // expect(xlsxAccess.getCell("A5", "Nested").style("fill").color).toEqual({ rgb: "EEEEEE" });
+        });
+    });
+
+    describe("5D demo checks", () => {
+        let xlsxAccess;
+
+        beforeAll(async () => {
+            xlsxAccess = await processData("./examples/multid-template.xlsx", genData5D);
+        });
+
+        afterAll(async () => {
+            await xlsxAccess.workbook().toFileAsync("./examples/multid-output.xlsx");
+        });
+
+        it("Has the static value properly", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe('Dimension 1');
+        });
+
+        it("Has Dimension 2 properly labelled", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A2", "5D"))).toBe('Dimension 2 - 1');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A27", "5D"))).toBe('Dimension 2 - 2');
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A2", "5D"))).toEqual([24, 1]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A27", "5D"))).toEqual([24, 1]);
+        });
+
+        it("Has Dimension 3 properly labelled", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("C2", "5D"))).toBe('Dimension 3 - 1');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("J2", "5D"))).toBe('Dimension 3 - 2');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("Q27", "5D"))).toBe('Dimension 3 - 3');
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("C2", "5D"))).toEqual([1, 6]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("J2", "5D"))).toEqual([1, 6]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("Q27", "5D"))).toEqual([1, 6]);
+        });
+
+        it("Has Dimension 4 properly labelled", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("B3", "5D"))).toBe('Dimension 4 - 1');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("B9", "5D"))).toBe('Dimension 4 - 2');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("I15", "5D"))).toBe('Dimension 4 - 3');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("P46", "5D"))).toBe('Dimension 4 - 4');
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("B3", "5D"))).toEqual([5, 1]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("B9", "5D"))).toEqual([5, 1]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("I15", "5D"))).toEqual([5, 1]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("P46", "5D"))).toEqual([5, 1]);
+        });
+
+        it("Has Dimension 5 properly populated", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("C3", "5D"))).toBe('1.1.1.1.1');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("D3", "5D"))).toBe('1.1.1.1.2');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("C4", "5D"))).toBe('1.1.1.2.1');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("V3", "5D"))).toBe('1.3.1.1.6');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("V50", "5D"))).toBe('2.3.4.5.6');
         });
     });
 });

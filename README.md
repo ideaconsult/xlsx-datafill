@@ -80,6 +80,8 @@ The resulting table will look like:
 | 2    | Row 2 | 21   | 22   | 23   | 24   | 25   |
 | 3    | Row 3 | 31   | 32   | 33   | 34   | 35   |
 
+If you want to get a real feel about the power of the engine — check the [multi-dimensional example](./examples/multid-output.xlsx), showing how an automatically generated [5D data](./examples/gen-data-5d.json) can get expanded throughout the sheet, [by a simple template](./examples/multid-template.xlsx).
+
 **Great! That’s it!**
 
 _One more thing..._ As the general syntax of the data extraction suggests - there is another, more elegant way to achieve the same result. The template in `B1` could have be written in the following form: `{{ | rows * data | }}`. Quite natural to write, and should be clear, by now, why it leads to the same result.

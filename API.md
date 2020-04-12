@@ -41,7 +41,7 @@ Constructs a new instance of XlsxDataFill with given options.
 | opts.joinText | <code>string</code> | The string to be used when the extracted value for a single cell is an array,  and it needs to be joined. Default is `,`. |
 | opts.mergeCells | <code>string</code> \| <code>boolean</code> | Whether to merge the higher dimension cells in the output. Default is true. |
 | opts.followFormulae | <code>boolean</code> | If a template is located as a result of a formula, whether to still process it. Default is false. |
-| opts.leaveStyle | <code>boolean</code> | Leave the style of the cells, as they are - don't copy from the template. Still the template styling _is_ applied. Default is false. |
+| opts.copyStyle | <code>boolean</code> | Copy the style of the template cell when populating. Even when `false`, the template styling _is_ applied. Default is true. |
 | opts.callbacksMap | <code>object.&lt;string, function()&gt;</code> | A map of handlers to be used for data and value extraction. There is one default - the empty one, for object key extraction. |
 
 <a name="XlsxDataFill+options"></a>

@@ -8,7 +8,7 @@ const defaultOpts = {
     joinText: ",",
     mergeCells: true,
     followFormulae: false,
-    leaveStyle: false,
+    copyStyle: true,
     callbacksMap: {
         "": data => _.keys(data)
     }
@@ -32,8 +32,8 @@ class XlsxDataFill {
      * @param {string|boolean} opts.mergeCells Whether to merge the higher dimension cells in the output. Default is true.
      * @param {boolean} opts.followFormulae If a template is located as a result of a formula, whether to still process it.
      * Default is false.
-     * @param {boolean} opts.leaveStyle Leave the style of the cells, as they are - don't copy from the template. Still the
-     * template styling _is_ applied. Default is false.
+     * @param {boolean} opts.copyStyle Copy the style of the template cell when populating. Even when `false`, the template
+     * styling _is_ applied. Default is true.
      * @param {object.<string, function>} opts.callbacksMap A map of handlers to be used for data and value extraction.
      * There is one default - the empty one, for object key extraction.
      */
@@ -153,7 +153,7 @@ class XlsxDataFill {
     applyDataStyle(cell, data, template) {
         const styles = template.styles;
 
-        if (!this._opts.leaveStyle)
+        if (this._opts.copyStyle)
             this._access.copyStyle(cell, template.cell);
         
         if (styles && data) {
@@ -319,8 +319,7 @@ class XlsxDataFill {
         let entrySize = data.sizes,
             value = this.extractValues(data, template.extractor, cell);
 
-
-        // make sure, the 
+        // if we've come up with a raw data
         if (!entrySize || !entrySize.length) {
             this._access.setCellValue(cell, value);
             this.applyDataStyle(cell, data, template);
@@ -343,7 +342,7 @@ class XlsxDataFill {
             });
         } else {
             // TODO: Deal with more than 3 dimensions case.
-            throw new Error(`Values extracted with '${template.extractor} are more than 2 dimension!'`);
+            throw new Error(`Values extracted with '${template.extractor}' are more than 2 dimension!'`);
         }
 
         return entrySize;
@@ -383,14 +382,18 @@ class XlsxDataFill {
                 _.forEach(this.putValues(nextCell, inRoot, template), sizeMaxxer);
 
                 let rowOffset = entrySize[0],
-                    colOffset = entrySize[1];
+                    colOffset = entrySize[1],
+                    rowPadding = template.padding[0] || 0,
+                    colPadding = template.padding[1] || 0;
 
                 // Make sure we grow only on one dimension.
                 if (theData.sizes[0] < 0) {
-                    rowOffset = 0;
+                    if (template.padding.length < 2)
+                        colPadding = rowPadding;
+                    rowOffset = rowPadding = 0;
                     entrySize[1] = 1;
-                } else {
-                    colOffset = 0;
+                } else if (theData.sizes.length < 2) {
+                    colOffset = colPadding = 0;
                     entrySize[0] = 1;
                 }
 
@@ -406,7 +409,7 @@ class XlsxDataFill {
                 }
 
                 // Finally, calculate the next cell.
-                nextCell = this._access.offsetCell(nextCell, rowOffset + (template.padding[0] || 0), colOffset + (template.padding[1] || 0));	
+                nextCell = this._access.offsetCell(nextCell, rowOffset + rowPadding, colOffset + colPadding);	
             }
 
             // Now recalc combined entry size.
