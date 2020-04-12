@@ -80,7 +80,7 @@ The resulting table will look like:
 | 2    | Row 2 | 21   | 22   | 23   | 24   | 25   |
 | 3    | Row 3 | 31   | 32   | 33   | 34   | 35   |
 
-If you want to get a real feel about the power of the engine — check the [multi-dimensional example](./examples/multid-output.xlsx), showing how an automatically generated [5D data](./examples/gen_data_5d.json) can get expanded throughout the sheet, [by a simple template](./examples/multid-template.xlsx).
+If you want to get a real feel about the power of the engine — check the [multi-dimensional example](./examples/multid-output.xlsx), showing how an automatically generated [5D data](./examples/gen-data-5d.json) can get expanded throughout the sheet, [by a simple template](./examples/multid-template.xlsx).
 
 **Great! That’s it!**
 
