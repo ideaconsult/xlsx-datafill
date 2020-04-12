@@ -11,6 +11,7 @@ const XlsxPopulateAccess = XlsxDataFill.XlsxPopulateAccess;
 const docsData = require("../examples/docs-data.json");
 const bookData = require("../examples/book-data.json");
 const stockData = require("../examples/stock-data.json");
+const genData5D = require("../examples/gen-data-5d.json");
 
 const processData = async (path, data, handlers, opts) => {
     const wb = await XlsxPopulate.fromFileAsync(path);
@@ -325,5 +326,34 @@ describe("XlsxDataFill: ", () => {
             // expect(xlsxAccess.getCell("A5", "Raw").style("fill").color).toEqual({ rgb: "EEEEEE" });
             // expect(xlsxAccess.getCell("A5", "Nested").style("fill").color).toEqual({ rgb: "EEEEEE" });
         });
+    });
+
+    describe("Multi dimensional examples", () => {
+        let xlsxAccess;
+
+        beforeAll(async () => {
+            xlsxAccess = await processData("./examples/multid-template.xlsx", genData5D);
+        });
+
+        afterAll(async () => {
+            await xlsxAccess.workbook().toFileAsync("./examples/multid-output.xlsx");
+        });
+
+        it("filled the non-reference title properly", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe('Dimension 1');
+        });
+
+        // it("kept the static titles", () => {
+        //     expect(xlsxAccess.cellValue(xlsxAccess.getCell("B2"))).toBe("Book Author");
+        // });
+
+        // it("filled the non-reference iterative book titles", () => {
+        //     expect(xlsxAccess.cellValue(xlsxAccess.getCell("A3"))).toBe(bookData.books[0].title);
+        //     expect(xlsxAccess.cellValue(xlsxAccess.getCell("B4"))).toBe(bookData.books[1].author);
+        //     expect(xlsxAccess.cellValue(xlsxAccess.getCell("C5"))).toBe(bookData.books[2].year_written);
+        //     expect(xlsxAccess.cellValue(xlsxAccess.getCell("A16"))).toBe(bookData.books[13].title);
+        //     expect(xlsxAccess.cellValue(xlsxAccess.getCell("B16"))).toBe(bookData.books[13].author);
+        //     expect(xlsxAccess.cellValue(xlsxAccess.getCell("C16"))).toBe(bookData.books[13].year_written);
+        // });
     });
 });

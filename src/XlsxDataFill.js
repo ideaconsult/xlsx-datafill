@@ -8,7 +8,7 @@ const defaultOpts = {
     joinText: ",",
     mergeCells: true,
     followFormulae: false,
-    leaveStyle: false,
+    copyStyle: true,
     callbacksMap: {
         "": data => _.keys(data)
     }
@@ -32,8 +32,8 @@ class XlsxDataFill {
      * @param {string|boolean} opts.mergeCells Whether to merge the higher dimension cells in the output. Default is true.
      * @param {boolean} opts.followFormulae If a template is located as a result of a formula, whether to still process it.
      * Default is false.
-     * @param {boolean} opts.leaveStyle Leave the style of the cells, as they are - don't copy from the template. Still the
-     * template styling _is_ applied. Default is false.
+     * @param {boolean} opts.copyStyle Copy the style of the template cell when populating. Even when `false`, the template
+     * styling _is_ applied. Default is true.
      * @param {object.<string, function>} opts.callbacksMap A map of handlers to be used for data and value extraction.
      * There is one default - the empty one, for object key extraction.
      */
@@ -153,7 +153,7 @@ class XlsxDataFill {
     applyDataStyle(cell, data, template) {
         const styles = template.styles;
 
-        if (!this._opts.leaveStyle)
+        if (this._opts.copyStyle)
             this._access.copyStyle(cell, template.cell);
         
         if (styles && data) {
