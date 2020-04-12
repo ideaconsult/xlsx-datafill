@@ -197,8 +197,10 @@ Here are the options and their defaults.
     joinText: ",",
     mergeCells: true,
     followFormulae: false,
+    copyStyle: true,
     callbacksMap: {
-        "": data => _.keys(data)
+        '': data => _.keys(data),
+        $: data => _.values(data)
     }
 };
 

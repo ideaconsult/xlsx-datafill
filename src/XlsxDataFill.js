@@ -10,7 +10,8 @@ const defaultOpts = {
     followFormulae: false,
     copyStyle: true,
     callbacksMap: {
-        "": data => _.keys(data)
+        '': data => _.keys(data),
+        $: data => _.values(data)
     }
 };
 
@@ -132,12 +133,12 @@ class XlsxDataFill {
     parseExtractor(extractor) {
         // A specific extractor can be specified after semilon - find and remember it.
         const extractParts = extractor.split(":"),
-            handlerName = extractParts[1];
+            handlerName = _.trim(extractParts[1]);
 
         return extractParts.length == 1
             ? { path: extractor, handler: null }
             : {
-                path: extractParts[0],
+                path: _.trim(extractParts[0]),
                 handler: this.getHandler(handlerName)
             };
     }
@@ -288,11 +289,14 @@ class XlsxDataFill {
         if (typeof parsedIter.handler === 'function')
             data = parsedIter.handler.call(this._opts, data);
 
-        if (idx < iterators.length - 1) {
+        if (!Array.isArray(data) && typeof data === 'object')
+            return data;
+        else if (idx < iterators.length - 1) {
             data = _.map(data, inRoot => this.extractData(inRoot, iterators, idx + 1));
-            sizes = data[0].sizes;
-        } else if (!Array.isArray(data) && typeof data === 'object')
-            data = _.values(data);
+            sizes = data[0].sizes || [];
+        }
+        
+        // data = _.values(data);
 
         // Some data sanity checks.
         if (!data)
@@ -320,7 +324,7 @@ class XlsxDataFill {
             value = this.extractValues(data, template.extractor, cell);
 
         // if we've come up with a raw data
-        if (!entrySize || !entrySize.length) {
+        if (!Array.isArray(value) || !entrySize || !entrySize.length) {
             this._access.setCellValue(cell, value);
             this.applyDataStyle(cell, data, template);
             entrySize = template.cellSize;
@@ -340,10 +344,8 @@ class XlsxDataFill {
                 this._access.setCellValue(cell, value[ri][ci]);
                 this.applyDataStyle(cell, data[ri][ci], template);
             });
-        } else {
-            // TODO: Deal with more than 3 dimensions case.
+        } else
             throw new Error(`Values extracted with '${template.extractor}' are more than 2 dimension!'`);
-        }
 
         return entrySize;
     }
