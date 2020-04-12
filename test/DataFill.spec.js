@@ -280,7 +280,9 @@ describe("XlsxDataFill: ", () => {
 
         beforeAll(async () => {
             xlsxAccess = await processData("./examples/stock-template.xlsx", stockData, {
-                rowFormat: (stock, cell) => cell.row().style('fill', cell.rowNumber() % 2 == 0 ? "ffffff" : "eeeeee")
+                rowFormat: (stock, cell) => 5 // cell.row().style('fill', cell.rowNumber() % 2 == 0 ? "ffffff" : "eeeeee")
+            }, {
+                copyStyle: false
             });
         });
 
