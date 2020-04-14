@@ -263,7 +263,7 @@ Specifying `both` as _iterators_ keyword will result in the same size (3x5 in th
 
 There are several specifics to be kept in mind:
 
-* The _iterators_ should resolve to arrays. It is possible for the last one (the innermost dimension) to resolve to an object, **but** in such case — it’ll be automatically converted to an array of object’s values. If you need the keys — append `:` to the last iterator - it’ll resolve to an empty _extraction handler_ which has a default definition of returning the keys of the provided object.
+* The _iterators_ usually resolve to an array. If it resolves to an object, and still some iteration is expected — it can be converted to an array of object’s values, using the `$` handler (i.e. appending `:$`). If you need the keys (as opposed to object’s values) — append `:` to the last iterator, i.e. utilizing an empty _extraction handler_. Both of these default handlers can be overridden with the provided options.
 * If during _value_ extraction, the result is an array — it is automatically joined, using the (configurable) `joinText` from the options.
 * No matter what part of the cell’s value the template definition occupies, at the end — the whole cell is overwritten with the resolved value(s). Since, this is not a simple find-and-replace, and the cells need duplication — it is not as trivial as expected. A possible workaround is to use handlers to append whatever is needed for each cell.
 * The `xlsx-populate` library is _not_ a dependency, because (potentially in the future) other accessors can be used, so don’t expect it to be there if you just refer `xlsx-datafill`.
