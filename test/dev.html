@@ -14,7 +14,7 @@
   <h1>XlsxDataFill local testpage</h1>
   <h2>Pick the template and data files</h2>
   <input type="file" id="files" name="files[]" multiple="true" onchange="filesSelected(event)" style="font-size: large;"/>
-  <output id="list"></output>
+  <output><ul id="list"></ul></output>
   <h2>Launch the data filling process</h2>
   <button id="gobut" type="button" onclick="launch()" disabled="true" style="font-size: large;">Go!</button>
 
@@ -29,6 +29,8 @@
           templateRegExp: /\{\{([^}]*)\}\}/,
           fieldSplitter: '|',
           joinText: ',',
+          followFormulae: false,
+          copyStyle: true,
           callbacksMap: {
               upperify : function (val) { return val.toUpperCase(); }
           }
@@ -76,7 +78,7 @@
         output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ', f.size, ' bytes','  - <strong>', fInfo, '</strong></li>');
       }
 
-      document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+      document.getElementById('list').innerHTML += output.join('');
     }
 
     function activateDownload(blob, error) {
