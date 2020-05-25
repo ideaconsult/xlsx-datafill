@@ -502,5 +502,6 @@ class XlsxDataFill {
  * @type {XlsxPopulateAccess}
  */
 XlsxDataFill.XlsxPopulateAccess = require('./XlsxPopulateAccess');
+XlsxDataFill.version = "{{VERSION}}";
 
 module.exports = XlsxDataFill;
