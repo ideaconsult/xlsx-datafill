@@ -17,12 +17,8 @@ const processData = async (path, data, handlers, opts) => {
     const wb = await XlsxPopulate.fromFileAsync(path);
     const xlsxAccess = new XlsxPopulateAccess(wb, XlsxPopulate);
     const dataFill = new XlsxDataFill(xlsxAccess, _.merge({ callbacksMap: handlers }, opts));
-    try {
-        dataFill.fillData(data);
-    } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
-    }
+    dataFill.fillData(data);
+
     return xlsxAccess;
 };
 
@@ -31,12 +27,10 @@ describe("XlsxDataFill: ", () => {
     describe("Docs Template", () => {
         let xlsxAccess;
 
-        beforeAll(async () => {
-            xlsxAccess = await processData("./examples/docs-template.xlsx", docsData);
-        });
+        beforeAll(async () => xlsxAccess = await processData("./examples/docs-template.xlsx", docsData));
 
         afterAll(async () => {
-            await xlsxAccess.workbook().toFileAsync("./examples/docs-output.xlsx");
+            xlsxAccess.workbook().toFileAsync("./examples/docs-output.xlsx");
         });
 
         it("filled the title properly", () => {
@@ -87,9 +81,7 @@ describe("XlsxDataFill: ", () => {
             xlsxAccess = await processData("./examples/formula-template.xlsx", docsData);
         });
 
-        afterAll(async () => {
-            await xlsxAccess.workbook().toFileAsync("./examples/formula-output.xlsx");
-        });
+        afterAll(async () => xlsxAccess.workbook().toFileAsync("./examples/formula-output.xlsx"));
 
         it("filled the title properly", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe(docsData.title);
@@ -158,9 +150,7 @@ describe("XlsxDataFill: ", () => {
             xlsxAccess = await processData("./examples/simple-template.xlsx", bookData);
         });
 
-        afterAll(async () => {
-            await xlsxAccess.workbook().toFileAsync("./examples/simple-output.xlsx");
-        });
+        afterAll(async () => xlsxAccess.workbook().toFileAsync("./examples/simple-output.xlsx"));
 
         it("filled the non-reference title properly", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe(bookData.library.name);
@@ -180,6 +170,23 @@ describe("XlsxDataFill: ", () => {
         });
     });
 
+    describe("Cyclic Books Template", () => {
+        let dataFill;
+
+        beforeAll(async () => {
+            const wb = await XlsxPopulate.fromFileAsync("./examples/cyclic-template.xlsx");
+            const xlsxAccess = new XlsxPopulateAccess(wb, XlsxPopulate);
+
+            dataFill = new XlsxDataFill(xlsxAccess);
+        });
+
+        it("will fail when scanning the template", async () => {
+            expect(() => dataFill.fillData(bookData)).toThrow(
+                new Error(`A reference cycle found, involving "'Sheet 1'!C3,'Sheet 1'!D3,'Sheet 1'!E3"!`)
+            );
+        });
+    });
+
     describe("Publishers Books Template", () => {
         let xlsxAccess;
 
@@ -190,9 +197,7 @@ describe("XlsxDataFill: ", () => {
             });
         });
 
-        afterAll(async () => {
-            await xlsxAccess.workbook().toFileAsync("./examples/publishers-output.xlsx");
-        });
+        afterAll(async () => xlsxAccess.workbook().toFileAsync("./examples/publishers-output.xlsx"));
 
         it("expands vertically", () => {
             expect(xlsxAccess.cellSize(xlsxAccess.getCell("A3"))).toEqual([5, 1]);
@@ -223,9 +228,7 @@ describe("XlsxDataFill: ", () => {
             });
         });
 
-        afterAll(async () => {
-            await xlsxAccess.workbook().toFileAsync("./examples/publishers-output-unmerged.xlsx");
-        });
+        afterAll(async () => xlsxAccess.workbook().toFileAsync("./examples/publishers-output-unmerged.xlsx"));
 
         it("doesn't expand vertically", () => {
             expect(xlsxAccess.cellSize(xlsxAccess.getCell("A3"))).toEqual([1, 1]);
@@ -254,9 +257,7 @@ describe("XlsxDataFill: ", () => {
             });
         });
 
-        afterAll(async () => {
-            await xlsxAccess.workbook().toFileAsync("./examples/books-output.xlsx");
-        });
+        afterAll(async () => xlsxAccess.workbook().toFileAsync("./examples/books-output.xlsx"));
 
         it("expands padding horizontally", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("D3"))).toBeUndefined();
@@ -286,9 +287,7 @@ describe("XlsxDataFill: ", () => {
             });
         });
 
-        afterAll(async () => {
-            await xlsxAccess.workbook().toFileAsync("./examples/stock-output.xlsx");
-        });
+        afterAll(async () => xlsxAccess.workbook().toFileAsync("./examples/stock-output.xlsx"));
 
         it("fills the title (year) row properly", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("B1", "Nested"))).toBe("2000");
@@ -337,9 +336,7 @@ describe("XlsxDataFill: ", () => {
             xlsxAccess = await processData("./examples/multid-template.xlsx", genData5D);
         });
 
-        afterAll(async () => {
-            await xlsxAccess.workbook().toFileAsync("./examples/multid-output.xlsx");
-        });
+        afterAll(async () => xlsxAccess.workbook().toFileAsync("./examples/multid-output.xlsx"));
 
         it("Has the static value properly", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe('Dimension 1');

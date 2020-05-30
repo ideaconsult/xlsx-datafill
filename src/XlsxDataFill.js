@@ -243,6 +243,9 @@ class XlsxDataFill {
                 freeList.push(...related[t.id]);
         }
 
+        if (sorted.length < list.length)
+            throw new Error(`A reference cycle found, involving "${_.map(_.xor(list, sorted), 'id').join(',')}"!`);
+
         return sorted;
     }
     
