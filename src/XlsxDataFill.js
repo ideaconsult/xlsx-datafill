@@ -89,7 +89,7 @@ class XlsxDataFill {
     
                 aFill.offset = this._access.cellDistance(refFill.template.cell, template.cell);
             }
-            dataFills[this._access.cellRef(template.cell)] = aFill;
+            dataFills[template.id] = aFill;
         });
     
         // Apply each fill onto the sheet.
@@ -199,6 +199,7 @@ class XlsxDataFill {
             throw new Error(`Invalid reference passed: '${parts[0]}'`);
 
         return {
+            id: this._access.cellRef(cell),
             reference: cellRef,
             iterators: parts[1].split(/x|\*/).map(_.trim),
             extractor: extractor,
@@ -213,6 +214,41 @@ class XlsxDataFill {
         };
     }
 
+    sortTemplates(list) {
+        const sorted = [],
+            related = {},
+            map = {},
+            freeList = [];
+
+        // First, make the dependency map and add the list of non-referencing templates
+        for (let i = 0; i < list.length; ++i) {
+            const t = list[i];
+            map[t.id] = i;
+
+            if (!t.reference)
+                freeList.push(t.id);
+            else 
+                (related[t.reference] = related[t.reference] || []).push(t.id);
+        }
+
+        // Now, make the actual sorting.
+        while (freeList.length > 0) {
+            const id = freeList.shift(),
+                t = list[map[id]];
+
+            sorted.push(t);
+            
+            // We use the fact that there is a single predecessor in our setup.
+            if (related[t.id])
+                freeList.push(...related[t.id]);
+        }
+
+        if (sorted.length < list.length)
+            throw new Error(`A reference cycle found, involving "${_.map(_.xor(list, sorted), 'id').join(',')}"!`);
+
+        return sorted;
+    }
+    
     /**
      * Searches the whole workbook for template pattern and constructs the templates for processing.
      * @param {Function} cb The callback to be invoked on each templated, after they are sorted.
@@ -231,9 +267,7 @@ class XlsxDataFill {
                 allTemplates.push(template);
         });
         
-        return allTemplates
-            .sort((a, b) => b.reference == this._access.cellRef(a.cell) || !a.reference ? -1 : 1)
-            .forEach(cb);
+        return this.sortTemplates(allTemplates).forEach(cb);
     }
 
     /**
@@ -502,5 +536,6 @@ class XlsxDataFill {
  * @type {XlsxPopulateAccess}
  */
 XlsxDataFill.XlsxPopulateAccess = require('./XlsxPopulateAccess');
+XlsxDataFill.version = "{{VERSION}}";
 
 module.exports = XlsxDataFill;

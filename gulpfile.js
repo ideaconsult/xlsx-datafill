@@ -9,6 +9,7 @@ const babelify = require('babelify');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
 const rename = require('gulp-rename');
+const replace = require('gulp-replace');
 const uglifyjs = require('gulp-uglify-es').default;
 const sourcemaps = require('gulp-sourcemaps');
 const eslint = require("gulp-eslint");
@@ -57,6 +58,7 @@ gulp.task("browserify", () =>
         .transform(babelify, CONFIG.BABEL)
         .bundle()
         .pipe(source(CONFIG.BROWSERIFY.bundle))
+        .pipe(replace('{{VERSION}}', pkg.version))
         .pipe(buffer())
         .pipe(gulp.dest(CONFIG.BROWSERIFY.dirname))
         .pipe(sourcemaps.init({ loadMaps: true }))

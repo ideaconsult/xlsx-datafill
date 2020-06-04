@@ -1,6 +1,6 @@
 {
   "name": "xlsx-datafill",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Scalable, template based data population for Excel XLSX spreadsheets.",
   "keywords": [
     "excel",
@@ -47,6 +47,7 @@
     "gulp-eslint": "^6.0.0",
     "gulp-jasmine": "^4.0.0",
     "gulp-rename": "^2.0.0",
+    "gulp-replace": "^1.0.0",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-uglify-es": "^2.0.0",
     "jsdoc-to-markdown": "^5.0.3",
