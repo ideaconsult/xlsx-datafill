@@ -45,4 +45,15 @@ describe("XlsxPopulateAccess", () => {
         xlsxAccess.setCellValue(cell, theValue);
         expect(xlsxAccess.cellValue(cell)).toBe(theValue);
     });
+
+    it("properly duplicates cell", () => {
+        const cell = xlsxAccess.getCell("A4"),
+            rng = xlsxAccess.getCellRange(cell, 4, 4),
+            theVal = xlsxAccess.cellValue(cell);
+
+        xlsxAccess.duplicateCell(cell, rng);
+        expect(xlsxAccess.cellValue(xlsxAccess.offsetCell(cell, 3, 3))).toEqual(theVal);
+        expect(xlsxAccess.cellValue(xlsxAccess.offsetCell(cell, 0, 3))).toEqual(theVal);
+        expect(xlsxAccess.cellValue(xlsxAccess.offsetCell(cell, 3, 0))).toEqual(theVal);
+    });
 });

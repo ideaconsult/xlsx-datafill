@@ -40,6 +40,7 @@ Constructs a new instance of XlsxDataFill with given options.
 | opts.fieldSplitter | <code>string</code> | The string to be expected as template field splitter. Default is `|`. |
 | opts.joinText | <code>string</code> | The string to be used when the extracted value for a single cell is an array,  and it needs to be joined. Default is `,`. |
 | opts.mergeCells | <code>string</code> \| <code>boolean</code> | Whether to merge the higher dimension cells in the output. Default is true. |
+| opts.duplicateCells | <code>string</code> \| <code>boolean</code> | Whether to duplicate the content of higher dimension cells, when not merged. Default is false. |
 | opts.followFormulae | <code>boolean</code> | If a template is located as a result of a formula, whether to still process it. Default is false. |
 | opts.copyStyle | <code>boolean</code> | Copy the style of the template cell when populating. Even when `false`, the template styling _is_ applied. Default is true. |
 | opts.callbacksMap | <code>object.&lt;string, function()&gt;</code> | A map of handlers to be used for data and value extraction. There is one default - the empty one, for object key extraction. |
@@ -96,6 +97,7 @@ but can be used as a reference for implementing custom spreadsheet accessors.
     * [.cellRef(cell, withSheet)](#XlsxPopulateAccess+cellRef) ⇒ <code>string</code>
     * [.buildRef(cell, adr, withSheet)](#XlsxPopulateAccess+buildRef) ⇒ <code>string</code>
     * [.getCell(address, sheetId)](#XlsxPopulateAccess+getCell) ⇒ <code>Cell</code>
+    * [.duplicateCell(cell, range)](#XlsxPopulateAccess+duplicateCell) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
     * [.getCellRange(cell, rowOffset, colOffset)](#XlsxPopulateAccess+getCellRange) ⇒ <code>Range</code>
     * [.offsetCell(cell, rows, cols)](#XlsxPopulateAccess+offsetCell) ⇒ <code>Cell</code>
     * [.rangeMerged(range, status)](#XlsxPopulateAccess+rangeMerged) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
@@ -253,6 +255,19 @@ Retrieves a given cell from a given sheet (or an active one).
 | --- | --- | --- |
 | address | <code>string</code> \| <code>object</code> \| <code>array</code> | The cell adress to be used |
 | sheetId | <code>string</code> \| <code>idx</code> | The id/name of the sheet to retrieve the cell from. Defaults to an active one. |
+
+<a name="XlsxPopulateAccess+duplicateCell"></a>
+
+### xlsxPopulateAccess.duplicateCell(cell, range) ⇒ [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)
+Duplicates a cell across a given range.
+
+**Kind**: instance method of [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess)  
+**Returns**: [<code>XlsxPopulateAccess</code>](#XlsxPopulateAccess) - For chain invokes.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| cell | <code>Cell</code> | Cell, which needs duplicating. |
+| range | <code>Range</code> | The range, as returned from [getCellRange](getCellRange) |
 
 <a name="XlsxPopulateAccess+getCellRange"></a>
 

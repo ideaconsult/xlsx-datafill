@@ -7,6 +7,7 @@ const defaultOpts = {
     fieldSplitter: "|",
     joinText: ",",
     mergeCells: true,
+    duplicateCells: false,
     followFormulae: false,
     copyStyle: true,
     callbacksMap: {
@@ -31,6 +32,7 @@ class XlsxDataFill {
      * @param {string} opts.joinText The string to be used when the extracted value for a single cell is an array, 
      * and it needs to be joined. Default is `,`.
      * @param {string|boolean} opts.mergeCells Whether to merge the higher dimension cells in the output. Default is true.
+     * @param {string|boolean} opts.duplicateCells Whether to duplicate the content of higher dimension cells, when not merged. Default is false.
      * @param {boolean} opts.followFormulae If a template is located as a result of a formula, whether to still process it.
      * Default is false.
      * @param {boolean} opts.copyStyle Copy the style of the template cell when populating. Even when `false`, the template
@@ -440,6 +442,10 @@ class XlsxDataFill {
                         || rowOffset > 1 && this._opts.mergeCells === 'vertical' 
                         || colOffset > 1 && this._opts.mergeCells === 'horizontal')
                         this._access.rangeMerged(rng, true);
+                    else if (this._opts.duplicateCells === true || this._opts.duplicateCells === 'both'
+                        || rowOffset > 1 && this._opts.duplicateCells === 'vertical' 
+                        || colOffset > 1 && this._opts.duplicateCells === 'horizontal')
+                        this._access.duplicateCell(nextCell, rng);
 
                     rng.forEach(cell => this.applyDataStyle(cell, inRoot, template));
                 }

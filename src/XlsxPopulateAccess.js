@@ -206,6 +206,17 @@ class XlsxPopulateAccess {
     }
 
     /**
+     * Duplicates a cell across a given range.
+     * @param {Cell} cell Cell, which needs duplicating.
+     * @param {Range} range The range, as returned from {@link getCellRange}
+     * @returns {XlsxPopulateAccess} For chain invokes.
+     */
+    duplicateCell(cell, range) {
+        range.value(cell.value());
+        return this;
+    }
+
+    /**
      * Constructs and returns the range starting from the given cell and spawning given rows and cells.
      * @param {Cell} cell The starting cell of the range.
      * @param {Number} rowOffset Number of rows away from the starting cell. 0 means same row.

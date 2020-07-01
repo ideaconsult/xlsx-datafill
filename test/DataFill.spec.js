@@ -245,8 +245,49 @@ describe("XlsxDataFill: ", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("D4"))).toBe(bookData.books[1].title);
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("E4"))).toBe(bookData.books[2].title);
         });
+
+        it("not filled padding / inner-dimension cells", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A4"))).toBeUndefined();
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A9"))).toBeUndefined();
+        });
     });
 
+    describe("Publishers Books Duplicate Template", () => {
+        let xlsxAccess;
+
+        beforeAll(async () => {
+            xlsxAccess = await processData("./examples/publishers-template.xlsx", bookData, {
+                matchEdition: pub => _.uniqBy(_.filter(bookData.books, book => book.edition == pub), book => book.author),
+                matchAuthor: ref => _.filter(bookData.books, book => book.author == ref.author && book.edition == ref.edition)
+            }, {
+                mergeCells: false,
+                duplicateCells: true
+            });
+        });
+
+        afterAll(async () => xlsxAccess.workbook().toFileAsync("./examples/publishers-output-duplicated.xlsx"));
+
+        it("doesn't expand vertically", () => {
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A3"))).toEqual([1, 1]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A4"))).toEqual([1, 1]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A8"))).toEqual([1, 1]);
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A9"))).toEqual([1, 1]);
+        });
+
+        it("filled the non-reference iterative book titles", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A3"))).toBe(bookData.publishers[0]);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A8"))).toBe(bookData.publishers[1]);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("B3"))).toBe(bookData.books[0].author);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("B4"))).toBe(bookData.books[1].author);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("D4"))).toBe(bookData.books[1].title);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("E4"))).toBe(bookData.books[2].title);
+        });
+
+        it("filled padding / inner-dimension cells", () => {
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A4"))).toBe(bookData.publishers[0]);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A9"))).toBe(bookData.publishers[1]);
+        });
+    });
 
     describe("Books Books Template", () => {
         let xlsxAccess;
