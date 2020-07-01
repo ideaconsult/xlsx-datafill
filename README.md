@@ -196,6 +196,7 @@ Here are the options and their defaults.
     fieldSplitter: "|",
     joinText: ",",
     mergeCells: true,
+    duplicateCells: false,
     followFormulae: false,
     copyStyle: true,
     callbacksMap: {
