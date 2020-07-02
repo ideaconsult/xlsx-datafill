@@ -26,19 +26,14 @@ class XlsxDataFill {
      * Constructs a new instance of XlsxDataFill with given options.
      * @param {object} accessor An instance of XLSX spreadsheet accessing class.
      * @param {{}} opts Options to be used during processing.
-     * @param {RegExp} opts.templateRegExp The regular expression to be used for template recognizing. 
-     * Default is `/\{\{([^}]*)\}\}/`, i.e. Mustache.
-     * @param {string} opts.fieldSplitter The string to be expected as template field splitter. Default is `|`.
-     * @param {string} opts.joinText The string to be used when the extracted value for a single cell is an array, 
-     * and it needs to be joined. Default is `,`.
-     * @param {string|boolean} opts.mergeCells Whether to merge the higher dimension cells in the output. Default is true.
-     * @param {string|boolean} opts.duplicateCells Whether to duplicate the content of higher dimension cells, when not merged. Default is false.
-     * @param {boolean} opts.followFormulae If a template is located as a result of a formula, whether to still process it.
-     * Default is false.
-     * @param {boolean} opts.copyStyle Copy the style of the template cell when populating. Even when `false`, the template
-     * styling _is_ applied. Default is true.
+     * @param {RegExp} opts.templateRegExp The regular expression to be used for template recognizing. Default is `/\{\{([^}]*)\}\}/`, i.e. Mustache.
+     * @param {string|RegExo} opts.fieldSplitter The string or regular expression to be used as template fields splitter. Default is `|`.
+     * @param {string} opts.joinText The string to be used when the extracted value for a single cell is an array, and it needs to be joined. Default is `,`.
+     * @param {string|boolean} opts.mergeCells Whether to merge the higher dimension cells in the output. Default is true, but valid values are also `"both"`, `"vertical"` and `"horizontal"`.
+     * @param {string|boolean} opts.duplicateCells Whether to duplicate the content of higher dimension cells, when not merged. Default is false. Same valud values as `mergeCells`.
+     * @param {boolean} opts.followFormulae If a template is located as a result of a formula, whether to still process it. Default is false.
+     * @param {boolean} opts.copyStyle Copy the style of the template cell when populating. Even when `false`, the template styling _is_ applied. Default is true.
      * @param {object.<string, function>} opts.callbacksMap A map of handlers to be used for data and value extraction.
-     * There is one default - the empty one, for object key extraction.
      */
     constructor(accessor, opts) {
         this._opts = _.defaultsDeep({}, opts, defaultOpts);
@@ -49,8 +44,7 @@ class XlsxDataFill {
 
     /**
      * Setter/getter for XlsxDataFill's options as set during construction.
-     * @param {{}|null} newOpts If set - the new options to be used. 
-     * @see {@constructor}.
+     * @param {{}|null} newOpts If set - the new options to be used. Check [up here]{@link #new-xlsxdatafillaccessor-opts}.
      * @returns {XlsxDataFill|{}} The required options (in getter mode) or XlsxDataFill (in setter mode) for chaining.
      */
     options(newOpts) {
