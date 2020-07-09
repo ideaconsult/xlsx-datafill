@@ -36,14 +36,14 @@ Constructs a new instance of XlsxDataFill with given options.
 | --- | --- | --- |
 | accessor | <code>object</code> | An instance of XLSX spreadsheet accessing class. |
 | opts | <code>Object</code> | Options to be used during processing. |
-| opts.templateRegExp | <code>RegExp</code> | The regular expression to be used for template recognizing.  Default is `/\{\{([^}]*)\}\}/`, i.e. Mustache. |
-| opts.fieldSplitter | <code>string</code> | The string to be expected as template field splitter. Default is `|`. |
-| opts.joinText | <code>string</code> | The string to be used when the extracted value for a single cell is an array,  and it needs to be joined. Default is `,`. |
-| opts.mergeCells | <code>string</code> \| <code>boolean</code> | Whether to merge the higher dimension cells in the output. Default is true. |
-| opts.duplicateCells | <code>string</code> \| <code>boolean</code> | Whether to duplicate the content of higher dimension cells, when not merged. Default is false. |
+| opts.templateRegExp | <code>RegExp</code> | The regular expression to be used for template recognizing. Default is `/\{\{([^}]*)\}\}/`, i.e. Mustache. |
+| opts.fieldSplitter | <code>string</code> \| <code>RegExo</code> | The string or regular expression to be used as template fields splitter. Default is `|`. |
+| opts.joinText | <code>string</code> | The string to be used when the extracted value for a single cell is an array, and it needs to be joined. Default is `,`. |
+| opts.mergeCells | <code>string</code> \| <code>boolean</code> | Whether to merge the higher dimension cells in the output. Default is true, but valid values are also `"both"`, `"vertical"` and `"horizontal"`. |
+| opts.duplicateCells | <code>string</code> \| <code>boolean</code> | Whether to duplicate the content of higher dimension cells, when not merged. Default is false. Same valud values as `mergeCells`. |
 | opts.followFormulae | <code>boolean</code> | If a template is located as a result of a formula, whether to still process it. Default is false. |
 | opts.copyStyle | <code>boolean</code> | Copy the style of the template cell when populating. Even when `false`, the template styling _is_ applied. Default is true. |
-| opts.callbacksMap | <code>object.&lt;string, function()&gt;</code> | A map of handlers to be used for data and value extraction. There is one default - the empty one, for object key extraction. |
+| opts.callbacksMap | <code>object.&lt;string, function()&gt;</code> | A map of handlers to be used for data and value extraction. |
 
 <a name="XlsxDataFill+options"></a>
 
@@ -52,11 +52,10 @@ Setter/getter for XlsxDataFill's options as set during construction.
 
 **Kind**: instance method of [<code>XlsxDataFill</code>](#XlsxDataFill)  
 **Returns**: [<code>XlsxDataFill</code>](#XlsxDataFill) \| <code>Object</code> - The required options (in getter mode) or XlsxDataFill (in setter mode) for chaining.  
-**See**: {@constructor}.  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| newOpts | <code>Object</code> \| <code>null</code> | If set - the new options to be used. |
+| newOpts | <code>Object</code> \| <code>null</code> | If set - the new options to be used. Check [up here](#new-xlsxdatafillaccessor-opts). |
 
 <a name="XlsxDataFill+fillData"></a>
 

@@ -194,7 +194,7 @@ Here are the options and their defaults.
 {
     templateRegExp: new RegExp(/\{\{([^}]*)\}\}/),
     fieldSplitter: "|",
-    joinText: ",",
+    joinText: ",",                     
     mergeCells: true,
     duplicateCells: false,
     followFormulae: false,
@@ -206,6 +206,22 @@ Here are the options and their defaults.
 };
 
 ```
+
+Check the [detailed description in the API](API.md#new-xlsxdatafillaccessor-opts). It is worth noting the `mergeCells` and `duplicateCells` behavior. 
+
+First, they both have the same set of possible values: `true`, `false`, `”both”`, `”vertical”`, `”horizontal”` – in which direction the cells need to be merged/duplicated. As expected `true` and `”both”` have the same meaning.
+
+Second, cells duplication is valid only when merging is disabled, in other words, if `mergeCells == true`, `duplicateCells` is ignored. Given these options:
+
+```js
+mergeCells: "vertical",
+duplicateCells: true
+```
+
+Is interpreted as follow:
+
+* If during data expansion a value in higher dimension occupies more than one cell in a **column**, they are merged – because these are _vertical_.
+* If a value from higher dimension occupies more than one cell in a **row**, then duplication options is taken into account and same value is duplicated on all these cells.
 
 ## <a id="formulae-handling">Formulae handling</a>
 
