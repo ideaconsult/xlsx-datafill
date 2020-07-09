@@ -163,15 +163,34 @@ class XlsxDataFill {
             _.each(styles, pair => {
                 if (_.startsWith(pair.name, ":")) {
                     this.getHandler(pair.name.substr(1)).call(this._opts, data, cell);
-                } else {
+                } else if (!_.startsWith(pair.name, "!")) {
                     const val = this.extractValues(data, pair.extractor, cell);
                     if (val)
-                        this._access.setCellStyle(cell, pair.name, val);
+                        this._access.setCellStyle(cell, pair.name, JSON.parse(val));
                 }
             });
         }
 
         return this;
+    }
+
+    /**
+     * Extract the options-specific parameters from the styles field and merge them with the global ones.
+     * @param {{}} template The template to extract options properties from.
+     * @returns {{}} The full options, 
+     * @ignore
+     */
+    getTemplateOpts(template) {
+        if (!template.styles)
+            return this._opts;
+        
+        const opts = _.clone(this._opts);
+        _.each(template.styles, pair => {
+            if (_.startsWith(pair.name, "!"))
+                opts[pair.name.substr(1)] = JSON.parse(pair.extractor);
+        });
+
+        return opts;
     }
 
     /**
@@ -436,15 +455,16 @@ class XlsxDataFill {
                 }
 
                 if (rowOffset > 1 || colOffset > 1) {
-                    const rng = this._access.getCellRange(nextCell, Math.max(rowOffset - 1, 0), Math.max(colOffset - 1, 0));
+                    const rng = this._access.getCellRange(nextCell, Math.max(rowOffset - 1, 0), Math.max(colOffset - 1, 0)),
+                        _opts = this.getTemplateOpts(template);
 
-                    if (this._opts.mergeCells === true || this._opts.mergeCell === 'both'
-                        || rowOffset > 1 && this._opts.mergeCells === 'vertical' 
-                        || colOffset > 1 && this._opts.mergeCells === 'horizontal')
+                    if (_opts.mergeCells === true || _opts.mergeCell === 'both'
+                        || rowOffset > 1 && _opts.mergeCells === 'vertical' 
+                        || colOffset > 1 && _opts.mergeCells === 'horizontal')
                         this._access.rangeMerged(rng, true);
-                    else if (this._opts.duplicateCells === true || this._opts.duplicateCells === 'both'
-                        || rowOffset > 1 && this._opts.duplicateCells === 'vertical' 
-                        || colOffset > 1 && this._opts.duplicateCells === 'horizontal')
+                    else if (_opts.duplicateCells === true || _opts.duplicateCells === 'both'
+                        || rowOffset > 1 && _opts.duplicateCells === 'vertical' 
+                        || colOffset > 1 && _opts.duplicateCells === 'horizontal')
                         this._access.duplicateCell(nextCell, rng);
 
                     rng.forEach(cell => this.applyDataStyle(cell, inRoot, template));

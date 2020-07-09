@@ -380,7 +380,7 @@ describe("XlsxDataFill: ", () => {
         afterAll(async () => xlsxAccess.workbook().toFileAsync("./examples/multid-output.xlsx"));
 
         it("Has the static value properly", () => {
-            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1"))).toBe('Dimension 1');
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A1", "5D"))).toBe('Dimension 1');
         });
 
         it("Has Dimension 2 properly labelled", () => {
@@ -391,6 +391,7 @@ describe("XlsxDataFill: ", () => {
         });
 
         it("Has Dimension 3 properly labelled", () => {
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("C2", "5D"))).toEqual([1, 6]);
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("C2", "5D"))).toBe('Dimension 3 - 1');
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("J2", "5D"))).toBe('Dimension 3 - 2');
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("Q27", "5D"))).toBe('Dimension 3 - 3');
@@ -400,6 +401,7 @@ describe("XlsxDataFill: ", () => {
         });
 
         it("Has Dimension 4 properly labelled", () => {
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("B3", "5D"))).toEqual([5, 1]);
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("B3", "5D"))).toBe('Dimension 4 - 1');
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("B9", "5D"))).toBe('Dimension 4 - 2');
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("I15", "5D"))).toBe('Dimension 4 - 3');
@@ -416,6 +418,13 @@ describe("XlsxDataFill: ", () => {
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("C4", "5D"))).toBe('1.1.1.2.1');
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("V3", "5D"))).toBe('1.3.1.1.6');
             expect(xlsxAccess.cellValue(xlsxAccess.getCell("V50", "5D"))).toBe('2.3.4.5.6');
+        });
+
+        it("Has Dimension 3 & 4 in 4D reflect options", () => {
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("A2", "4D-merges"))).toEqual([5, 1]);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("A2", "4D-merges"))).toBe('Dimension 3 - 1');
+            expect(xlsxAccess.cellSize(xlsxAccess.getCell("B2", "4D-merges"))).toEqual([1, 1]);
+            expect(xlsxAccess.cellValue(xlsxAccess.getCell("B2", "4D-merges"))).toBe('Dimension 4 - 1');
         });
     });
 });
