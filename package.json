@@ -34,7 +34,7 @@
   },
   "bugs": "https://github.com/ideaconsult/xlsx-datafill/labels/bug",
   "dependencies": {
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
