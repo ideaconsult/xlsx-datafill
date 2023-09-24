@@ -1,5 +1,7 @@
 # Xlsx smart templates DataFill
 
+[![DOI](https://zenodo.org/badge/233575902.svg)](https://zenodo.org/badge/latestdoi/233575902)
+
 The library takes an existing `.xlsx` file and _populates_ the extracted data from provided `JSON`, into the designated cell**s**, which we call _templates_. If the extracted data is an array - it is expanded and occupies as many cells, as the size of the data. In both dimensions.
 
 Each template follows a specific format and structure, and it defines these crucial aspects:
